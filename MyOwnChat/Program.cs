@@ -8,11 +8,12 @@ using System.Net.Sockets;
 using System.IO;
 using ProtocolsMessages;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.Json;
+
+
 
 namespace MyOwnChat
 {
-    [Serializable]
+
     class Program
     {
         private static IPAddress iP;
@@ -20,9 +21,8 @@ namespace MyOwnChat
         private static TcpListener server;
         private static string address = "127.0.0.1";
         private static int port = 1250;
-        private static string pathFile = "clients.json";
-        private static ListClient listClient;
-        private static Client client;
+        private static string pathFile = "clients.dat";
+        private static List<Client> clients;
         private static object lck;
 
         static void Main(string[] args)
@@ -30,12 +30,10 @@ namespace MyOwnChat
             iP = IPAddress.Parse(address);
             endPoint = new IPEndPoint(iP, port);
             server = new TcpListener(endPoint);
-            listClient = new ListClient();
-            listClient.clients = new List<Client>();
-            //clients = new List<Client>();
+            clients = new List<Client>();
             lck = new object();
             //if (File.Exists(pathFile))
-               // LoadClients();
+            //    LoadClients();
             server.Start(50);
 
             Console.WriteLine($"Server started: {endPoint.Address} : {endPoint.Port}");
@@ -46,51 +44,33 @@ namespace MyOwnChat
                 {
                     while (true)
                     {
-                       
+
                         TcpClient socket = server.AcceptTcpClient();
                         Task.Run(() =>
                         {
                             string[] login = new string[2];
                             login = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                            //string pass = ((DataMessage)Transfer.ReceiveTCP(socket)).Message;
-                            if (listClient.clients.Count == 0)
-                            {
-                                client = new Client()
-                                {
-                                    Name = login[0],
-                                    Password = login[1],
-                                    ClientTcp = socket,
-                                    EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
-                                };
-                                listClient.clients.Add(client);
-                                //SaveClients();
-                            }
-                            else if (!ClientExist(login[0]))
-                            {
-                                client = new Client()
-                                {
-                                    Name = login[0],
-                                    Password = login[1],
-                                    ClientTcp = socket,
-                                    EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
-                                };
-                                listClient.clients.Add(client);
-                                //SaveClients();
-                            }
-                            else if (!IdentificationClient(login))
-                            {
-                                Transfer.SendTCP(socket, new DataMessage() { Message = "No" });
-                            }
+                            LoginCheck(socket, login);
 
+                            Client client = new Client();
+                            client = clients[clients.FindIndex((x) => x.Name == login[0])];
                             Console.WriteLine($"Client connected with Name: {client.Name} and IP: {client.EndPointClient.Address}");
                             SendToEveryone(client, $"{client.Name} joined to chat");
 
-                            while (true)
+                            try
                             {
-                                string message = $"[{client.Name}]: " + ((DataMessage)Transfer.ReceiveTCP(client.ClientTcp)).Message;
-                                Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
-                                SendToEveryone(client, message);
+                                while (true)
+                                {
+                                    string message = $"[{client.Name}]: " + ((DataMessage)Transfer.ReceiveTCP(socket)).Message;
+                                    Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
+                                    SendToEveryone(client, message);
+                                }
                             }
+                            catch (Exception)
+                            {
+                                throw;
+                            }
+
                         });
 
                     }
@@ -105,11 +85,47 @@ namespace MyOwnChat
             server.Stop();
         }
 
+        private static void LoginCheck(TcpClient socket, string[] login)
+        {
+            if (clients.Count == 0)
+            {
+                Client client = new Client()
+                {
+                    Name = login[0],
+                    Password = login[1],
+                    //Ip = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()
+                    ClientTcp = socket,
+                    EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
+                };
+
+                clients.Add(client);
+                //SaveClients();
+            }
+            else if (!ClientExist(login[0]))
+            {
+                Client client = new Client()
+                {
+                    Name = login[0],
+                    Password = login[1],
+                    //Ip = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()
+                    ClientTcp = socket,
+                    EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
+                };
+
+                clients.Add(client);
+                //SaveClients();
+            }
+            else if (!IdentificationClient(login))
+            {
+                Transfer.SendTCP(socket, new DataMessage() { Message = "No" });
+            }
+        }
+
         private static void SendToEveryone(Client client, string message)
         {
             lock (lck)
             {
-                foreach (var item in listClient.clients)
+                foreach (var item in clients)
                 {
                     Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Message = message }));
                 }
@@ -117,21 +133,12 @@ namespace MyOwnChat
             }
         }
 
-        private static async void SaveClients()
+        private static void SaveClients()
         {
-            //BinaryFormatter formatter = new BinaryFormatter();
-            using (FileStream fs = new FileStream(pathFile, FileMode.OpenOrCreate, FileAccess.Write))
+            BinaryFormatter binary = new BinaryFormatter();
+            using (FileStream fs = new FileStream(pathFile, FileMode.OpenOrCreate))
             {
-                try
-                {
- await JsonSerializer.SerializeAsync(fs, listClient.clients);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                //formatter.Serialize(fs, listClient.clients);
-               
+                binary.Serialize(fs, clients);
             }
         }
 
@@ -141,48 +148,43 @@ namespace MyOwnChat
 
             using (FileStream fs = new FileStream(pathFile, FileMode.Open, FileAccess.Read))
             {
-                listClient = (ListClient)formatter.Deserialize(fs);
+                clients = (List<Client>)formatter.Deserialize(fs);
             }
         }
 
         private static bool ClientExist(string name)
         {
-            foreach (var item in listClient.clients)
+            foreach (var item in clients)
             {
                 if (item.Name == name)
-                {
-                    Transfer.SendTCP(item.ClientTcp, new DataMessage() { Message = "No" });
                     return true;
-                }
             }
             return false;
         }
 
         private static bool IdentificationClient(string[] name)
         {
-            foreach (var item in listClient.clients)
+            foreach (var item in clients)
             {
-                if (item.Name != name[0] || item.Password != name[1])
-                    return false;
+                if (item.Name == name[0] || item.Password == name[1])
+                    return true;
             }
-            return true;
+            return false;
         }
     }
 
 
-   // [Serializable]
+    //[Serializable]
     public class Client
     {
         public string Name { get; set; }
         public string Password { get; set; }
+        //[NonSerialized]
         public TcpClient ClientTcp { get; set; }
+        //[NonSerialized]
         public IPEndPoint EndPointClient { get; set; }
-    }
+        //public string Ip { get; set; }
 
-    //[Serializable]
-    public class ListClient
-    {
-        public List<Client> clients { get; set; }
     }
 
 }

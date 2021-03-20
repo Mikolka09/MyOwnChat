@@ -51,15 +51,7 @@ namespace ClientChat
                 else
                     res = false;
             }
-            //while (textBoxPass.Text != textBoxRepeat.Text)
-            //{
-            //    MessageBox.Show("Enter your password again", "Warning",
-            //                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //    textBoxPass.Clear();
-            //    textBoxRepeat.Clear();
-            //}
-            //string pass = Hash(textBoxPass.Text);
-            //Transfer.SendTCP(tcp, new DataMessage() { Message = pass });
+           
             DialogResult = DialogResult.OK;
         }
 

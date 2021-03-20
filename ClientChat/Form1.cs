@@ -72,7 +72,7 @@ namespace ClientChat
         {
             Input input = new Input();
             if (input.ShowDialog(this) == DialogResult.OK)
-                //login = input.login;
+                login = input.login;
             buttonInput.Enabled = false;
             buttonRegistration.Enabled = false;
             StartChat();
@@ -93,7 +93,7 @@ namespace ClientChat
             try
             {
                 string message = textBoxMessage.Text;
-                Transfer.SendTCP(socket, new DataMessage() { Message = message});
+                Transfer.SendTCP(socket, new DataMessage() { Message = message });
                 textBoxMessage.Clear();
             }
             catch (Exception) { throw; }
@@ -101,8 +101,9 @@ namespace ClientChat
 
         private void buttonExit_Click(object sender, EventArgs e)
         {
-            if(socket.Connected)
+            if (socket.Connected)
             {
+                socket.Client.Dispose();
                 socket.Close();
                 Close();
             }

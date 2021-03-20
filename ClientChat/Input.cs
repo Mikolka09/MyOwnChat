@@ -16,7 +16,7 @@ namespace ClientChat
 {
     public partial class Input : Form
     {
-        public string login { get; set; }
+        public string[] login { get; set; }
         private TcpClient tcp;
 
         public Input()
@@ -27,15 +27,16 @@ namespace ClientChat
         private void buttonOK_Click(object sender, EventArgs e)
         {
             tcp = (Owner as Form1).socket;
-            login = textBoxLogin.Text;
-            Transfer.SendTCP(tcp, new DataMessage() { Message = login });
-            string pass = Hash(textBoxPass.Text);
-            Transfer.SendTCP(tcp, new DataMessage() { Message = pass });
+            login = new string[2];
+            login[0] = textBoxLogin.Text;
+            login[1] = Hash(textBoxPass.Text);
+            Transfer.SendTCP(tcp, new DataMessage() { Array = login });
             if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
             {
                 MessageBox.Show("Login or password is not correct, please try again", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLogin.Clear();
+                textBoxPass.Clear();
                 return;
             }
             DialogResult = DialogResult.OK;

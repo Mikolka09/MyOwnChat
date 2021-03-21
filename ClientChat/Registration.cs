@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using ProtocolsMessages;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace ClientChat
 {
@@ -28,18 +29,37 @@ namespace ClientChat
         {
             tcp = (Owner as Form1).socket;
             login = new string[2];
+            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
+            Regex regPass = new Regex("^\\S{1,8}$");
             bool res = true;
             while (res)
-            {            
-                login[0] = textBoxLogin.Text;
-                while (textBoxPass.Text != textBoxRepeat.Text)
+            {
+                if (!regLog.IsMatch(textBoxLogin.Text))
                 {
-                    MessageBox.Show("Enter your password again", "Warning",
+                    MessageBox.Show("Login entered incorrectly", "Warning",
                                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    textBoxPass.Clear();
-                    textBoxRepeat.Clear();
+                    return;
                 }
-                login[1] = Hash(textBoxPass.Text);
+                else
+                    login[0] = textBoxLogin.Text;
+                if (!regPass.IsMatch(textBoxPass.Text))
+                {
+                    MessageBox.Show("Password entered incorrectly", "Warning",
+                                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                else
+                {
+                    while (textBoxPass.Text != textBoxRepeat.Text)
+                    {
+                        MessageBox.Show("Enter your password again", "Warning",
+                                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        textBoxPass.Clear();
+                        textBoxRepeat.Clear();
+                    }
+                    login[1] = Hash(textBoxPass.Text);
+                }
+                
                 Transfer.SendTCP(tcp, new DataMessage() { Array = login });
                 if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
                 {
@@ -47,11 +67,13 @@ namespace ClientChat
                                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     res = true;
                     textBoxLogin.Clear();
+                    textBoxPass.Clear();
+                    textBoxRepeat.Clear();
                 }
                 else
                     res = false;
             }
-           
+
             DialogResult = DialogResult.OK;
         }
 

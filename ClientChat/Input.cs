@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using ProtocolsMessages;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace ClientChat
 {
@@ -27,9 +28,26 @@ namespace ClientChat
         private void buttonOK_Click(object sender, EventArgs e)
         {
             tcp = (Owner as Form1).socket;
+            Regex regLog = new Regex("^[A - zА - я]([A - z0 - 9А - я]{ 1, 9 })$");
+            Regex regPass = new Regex("^[A - zА - я]([A - z0 - 9А - я]{ 2, 8 })$");
             login = new string[2];
-            login[0] = textBoxLogin.Text;
-            login[1] = Hash(textBoxPass.Text);
+            if (!regLog.IsMatch(textBoxLogin.Text))
+            {
+                MessageBox.Show("Login entered incorrectly", "Warning",
+                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else
+                login[0] = textBoxLogin.Text;
+            if (!regPass.IsMatch(textBoxPass.Text))
+            {
+                MessageBox.Show("Password entered incorrectly", "Warning",
+                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else
+                login[1] = Hash(textBoxPass.Text);
+
             Transfer.SendTCP(tcp, new DataMessage() { Array = login });
             if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
             {
@@ -39,7 +57,8 @@ namespace ClientChat
                 textBoxPass.Clear();
                 return;
             }
-            DialogResult = DialogResult.OK;
+            else
+                DialogResult = DialogResult.OK;
         }
 
         public string Hash(string password)

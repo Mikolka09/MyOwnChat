@@ -14,7 +14,7 @@ namespace ProtocolsMessages
     public interface Data { }
 
     [Serializable]
-    public class DataMessage: Data
+    public class DataMessage : Data
     {
         public string Message { get; set; }
         public string[] Array { get; set; }
@@ -26,12 +26,21 @@ namespace ProtocolsMessages
 
         public static void SendTCP(TcpClient client, Data data)
         {
-            formatter.Serialize(client.GetStream(), data);
+            try
+            {
+                formatter.Serialize(client.GetStream(), data);
+            }
+            catch { }
+
         }
 
         public static Data ReceiveTCP(TcpClient client)
         {
-            return (Data)formatter.Deserialize(client.GetStream());
+            try
+            {
+                return (Data)formatter.Deserialize(client.GetStream());
+            }
+            catch { throw; }
         }
     }
 }

@@ -57,7 +57,7 @@ namespace ClientChat
             this.textBoxPass.Name = "textBoxPass";
             this.textBoxPass.PasswordChar = '*';
             this.textBoxPass.Size = new System.Drawing.Size(245, 34);
-            this.textBoxPass.TabIndex = 10;
+            this.textBoxPass.TabIndex = 1;
             // 
             // buttonExit
             // 
@@ -66,7 +66,7 @@ namespace ClientChat
             this.buttonExit.Location = new System.Drawing.Point(204, 238);
             this.buttonExit.Name = "buttonExit";
             this.buttonExit.Size = new System.Drawing.Size(86, 33);
-            this.buttonExit.TabIndex = 9;
+            this.buttonExit.TabIndex = 4;
             this.buttonExit.Text = "Cancel";
             this.buttonExit.UseVisualStyleBackColor = false;
             this.buttonExit.Click += new System.EventHandler(this.buttonExit_Click);
@@ -78,7 +78,7 @@ namespace ClientChat
             this.buttonOK.Location = new System.Drawing.Point(12, 238);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(86, 33);
-            this.buttonOK.TabIndex = 8;
+            this.buttonOK.TabIndex = 3;
             this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = false;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
@@ -100,7 +100,7 @@ namespace ClientChat
             this.textBoxLogin.Multiline = true;
             this.textBoxLogin.Name = "textBoxLogin";
             this.textBoxLogin.Size = new System.Drawing.Size(245, 34);
-            this.textBoxLogin.TabIndex = 6;
+            this.textBoxLogin.TabIndex = 0;
             // 
             // label3
             // 
@@ -120,7 +120,7 @@ namespace ClientChat
             this.textBoxRepeat.Name = "textBoxRepeat";
             this.textBoxRepeat.PasswordChar = '*';
             this.textBoxRepeat.Size = new System.Drawing.Size(245, 34);
-            this.textBoxRepeat.TabIndex = 12;
+            this.textBoxRepeat.TabIndex = 2;
             // 
             // Registration
             // 

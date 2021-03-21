@@ -8,8 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using ProtocolsMessages;
 using System.Runtime.Serialization.Formatters.Binary;
-
-
+using System.Threading;
 
 namespace MyOwnChat
 {
@@ -22,8 +21,10 @@ namespace MyOwnChat
         private static string address = "127.0.0.1";
         private static int port = 1250;
         private static string pathFile = "clients.dat";
+        private static List<Client> clientsFile;
         private static List<Client> clients;
         private static object lck;
+        private static CancellationTokenSource m_cts;
 
         static void Main(string[] args)
         {
@@ -31,9 +32,11 @@ namespace MyOwnChat
             endPoint = new IPEndPoint(iP, port);
             server = new TcpListener(endPoint);
             clients = new List<Client>();
+            clientsFile = new List<Client>();
             lck = new object();
-            //if (File.Exists(pathFile))
-            //    LoadClients();
+            m_cts = new CancellationTokenSource();
+            if (File.Exists(pathFile))
+                LoadClients();
             server.Start(50);
 
             Console.WriteLine($"Server started: {endPoint.Address} : {endPoint.Port}");
@@ -50,7 +53,10 @@ namespace MyOwnChat
                         {
                             string[] login = new string[2];
                             login = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                            LoginCheck(socket, login);
+                            if (login != null)
+                                LoginCheck(socket, login);
+                            else
+                                return;
 
                             Client client = new Client();
                             client = clients[clients.FindIndex((x) => x.Name == login[0])];
@@ -59,16 +65,19 @@ namespace MyOwnChat
 
                             try
                             {
-                                while (true)
+                                while (!m_cts.Token.IsCancellationRequested)
                                 {
                                     string message = $"[{client.Name}]: " + ((DataMessage)Transfer.ReceiveTCP(socket)).Message;
+                                    if (message == $"[{login[0]}]: exit")
+                                        m_cts.Cancel();
                                     Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
                                     SendToEveryone(client, message);
                                 }
                             }
-                            catch (Exception)
+                            catch (SocketException e)
                             {
-                                throw;
+                                if (e.SocketErrorCode == SocketError.Interrupted)
+                                    throw;
                             }
 
                         });
@@ -87,19 +96,19 @@ namespace MyOwnChat
 
         private static void LoginCheck(TcpClient socket, string[] login)
         {
-            if (clients.Count == 0)
+            if (clientsFile.Count == 0)
             {
                 Client client = new Client()
                 {
                     Name = login[0],
                     Password = login[1],
-                    //Ip = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
 
+                clientsFile.Add(client);
                 clients.Add(client);
-                //SaveClients();
+                SaveClients();
             }
             else if (!ClientExist(login[0]))
             {
@@ -107,18 +116,28 @@ namespace MyOwnChat
                 {
                     Name = login[0],
                     Password = login[1],
-                    //Ip = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()
+                    ClientTcp = socket,
+                    EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
+                };
+
+                clientsFile.Add(client);
+                clients.Add(client);
+                SaveClients();
+            }
+            else if (IdentificationClient(login))
+            {
+                Client client = new Client()
+                {
+                    Name = login[0],
+                    Password = login[1],
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
 
                 clients.Add(client);
-                //SaveClients();
             }
-            else if (!IdentificationClient(login))
-            {
+            else
                 Transfer.SendTCP(socket, new DataMessage() { Message = "No" });
-            }
         }
 
         private static void SendToEveryone(Client client, string message)
@@ -138,7 +157,7 @@ namespace MyOwnChat
             BinaryFormatter binary = new BinaryFormatter();
             using (FileStream fs = new FileStream(pathFile, FileMode.OpenOrCreate))
             {
-                binary.Serialize(fs, clients);
+                binary.Serialize(fs, clientsFile);
             }
         }
 
@@ -148,13 +167,13 @@ namespace MyOwnChat
 
             using (FileStream fs = new FileStream(pathFile, FileMode.Open, FileAccess.Read))
             {
-                clients = (List<Client>)formatter.Deserialize(fs);
+                clientsFile = (List<Client>)formatter.Deserialize(fs);
             }
         }
 
         private static bool ClientExist(string name)
         {
-            foreach (var item in clients)
+            foreach (var item in clientsFile)
             {
                 if (item.Name == name)
                     return true;
@@ -164,7 +183,7 @@ namespace MyOwnChat
 
         private static bool IdentificationClient(string[] name)
         {
-            foreach (var item in clients)
+            foreach (var item in clientsFile)
             {
                 if (item.Name == name[0] || item.Password == name[1])
                     return true;
@@ -174,16 +193,15 @@ namespace MyOwnChat
     }
 
 
-    //[Serializable]
+    [Serializable]
     public class Client
     {
         public string Name { get; set; }
         public string Password { get; set; }
-        //[NonSerialized]
-        public TcpClient ClientTcp { get; set; }
-        //[NonSerialized]
-        public IPEndPoint EndPointClient { get; set; }
-        //public string Ip { get; set; }
+        [NonSerialized]
+        public TcpClient ClientTcp;
+        [NonSerialized]
+        public IPEndPoint EndPointClient;
 
     }
 

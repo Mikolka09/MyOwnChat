@@ -98,7 +98,7 @@ namespace ClientChat
             this.textBoxPass.Name = "textBoxPass";
             this.textBoxPass.PasswordChar = '*';
             this.textBoxPass.Size = new System.Drawing.Size(202, 34);
-            this.textBoxPass.TabIndex = 4;
+            this.textBoxPass.TabIndex = 1;
             // 
             // Input
             // 

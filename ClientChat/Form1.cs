@@ -29,20 +29,36 @@ namespace ClientChat
 
         private void ConnectServer()
         {
-            iP = IPAddress.Parse(address);
-            endPoint = new IPEndPoint(iP, port);
-            socket = new TcpClient();
-            socket.Connect(endPoint);
-            if (socket.Connected)
+            try
             {
-                listViewMessages.Items.Add("SERVER CONNEСTOR");
+                iP = IPAddress.Parse(address);
+                endPoint = new IPEndPoint(iP, port);
+                socket = new TcpClient();
+                socket.Connect(endPoint);
+                if (socket.Connected)
+                {
+                    listViewMessages.Items.Clear();
+                    listViewMessages.Items.Add("SERVER CONNEСTOR");
+                    listViewMessages.Items[0].ForeColor = Color.Red;
+                    buttonConnect.Enabled = false;  
+                    buttonInput.Enabled = true;
+                    buttonRegistration.Enabled = true;
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("SERVER IS NOT CONNECTOR", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                listViewMessages.Items.Add("SERVER IS NOT CONNECTOR");
                 listViewMessages.Items[0].ForeColor = Color.Red;
+                buttonInput.Enabled = false;
+                buttonRegistration.Enabled = false;
             }
         }
 
         private void StartChat()
         {
             buttonSend.Enabled = true;
+            textBoxMessage.Enabled = true;
             ReceiveAsync();
         }
 
@@ -65,6 +81,7 @@ namespace ClientChat
         private void Form1_Load(object sender, EventArgs e)
         {
             buttonSend.Enabled = false;
+            textBoxMessage.Enabled = false;
             ConnectServer();
         }
 
@@ -72,20 +89,38 @@ namespace ClientChat
         {
             Input input = new Input();
             if (input.ShowDialog(this) == DialogResult.OK)
+            {
                 login = input.login;
-            buttonInput.Enabled = false;
-            buttonRegistration.Enabled = false;
-            StartChat();
+                buttonInput.Enabled = false;
+                buttonRegistration.Enabled = false;
+                this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
+                StartChat();
+            }
+            else
+            {
+                buttonInput.Enabled = true;
+                buttonRegistration.Enabled = true;
+            }
         }
 
         private void buttonRegistration_Click(object sender, EventArgs e)
         {
             Registration reg = new Registration();
             if (reg.ShowDialog(this) == DialogResult.OK)
+            {
                 login = reg.login;
-            buttonInput.Enabled = false;
-            buttonRegistration.Enabled = false;
-            StartChat();
+                buttonInput.Enabled = false;
+                buttonRegistration.Enabled = false;
+                this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
+                StartChat();
+            }
+            else
+            {
+                buttonInput.Enabled = true;
+                buttonRegistration.Enabled = true;
+            }
+
+
         }
 
         private void buttonSend_Click(object sender, EventArgs e)
@@ -103,12 +138,17 @@ namespace ClientChat
         {
             if (socket.Connected)
             {
-                socket.Client.Dispose();
+                Transfer.SendTCP(socket, new DataMessage() { Message = "exit" });
                 socket.Close();
                 Close();
             }
             else
                 Close();
+        }
+
+        private void buttonConnect_Click(object sender, EventArgs e)
+        {
+            ConnectServer();
         }
     }
 }

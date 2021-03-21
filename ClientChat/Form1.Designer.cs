@@ -38,6 +38,7 @@ namespace ClientChat
             this.buttonSend = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.listViewMessages = new System.Windows.Forms.ListView();
+            this.buttonConnect = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -138,11 +139,24 @@ namespace ClientChat
             this.listViewMessages.UseCompatibleStateImageBehavior = false;
             this.listViewMessages.View = System.Windows.Forms.View.List;
             // 
+            // buttonConnect
+            // 
+            this.buttonConnect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.buttonConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonConnect.Location = new System.Drawing.Point(12, 453);
+            this.buttonConnect.Name = "buttonConnect";
+            this.buttonConnect.Size = new System.Drawing.Size(117, 36);
+            this.buttonConnect.TabIndex = 10;
+            this.buttonConnect.Text = "CONNECT";
+            this.buttonConnect.UseVisualStyleBackColor = false;
+            this.buttonConnect.Click += new System.EventHandler(this.buttonConnect_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 501);
+            this.Controls.Add(this.buttonConnect);
             this.Controls.Add(this.listViewMessages);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.buttonSend);
@@ -169,6 +183,7 @@ namespace ClientChat
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ListView listViewMessages;
+        private System.Windows.Forms.Button buttonConnect;
     }
 }
 

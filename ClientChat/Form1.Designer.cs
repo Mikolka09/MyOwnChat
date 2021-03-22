@@ -36,10 +36,10 @@ namespace ClientChat
             this.buttonSend = new System.Windows.Forms.Button();
             this.listViewMessages = new System.Windows.Forms.ListView();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.textBoxName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.buttonInquiry = new System.Windows.Forms.Button();
             this.buttonCancelPrivateChat = new System.Windows.Forms.Button();
+            this.buttonInquiry = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBoxName = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -116,25 +116,19 @@ namespace ClientChat
             this.groupBox1.Size = new System.Drawing.Size(341, 87);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "RRIVATE CHAT";
+            this.groupBox1.Text = "RRIVATE MESSAGE";
             // 
-            // textBoxName
+            // buttonCancelPrivateChat
             // 
-            this.textBoxName.Location = new System.Drawing.Point(6, 45);
-            this.textBoxName.Multiline = true;
-            this.textBoxName.Name = "textBoxName";
-            this.textBoxName.Size = new System.Drawing.Size(162, 32);
-            this.textBoxName.TabIndex = 0;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(40, 25);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(92, 17);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "Enter Login";
+            this.buttonCancelPrivateChat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.buttonCancelPrivateChat.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonCancelPrivateChat.Location = new System.Drawing.Point(256, 45);
+            this.buttonCancelPrivateChat.Name = "buttonCancelPrivateChat";
+            this.buttonCancelPrivateChat.Size = new System.Drawing.Size(76, 32);
+            this.buttonCancelPrivateChat.TabIndex = 12;
+            this.buttonCancelPrivateChat.Text = "Cancel";
+            this.buttonCancelPrivateChat.UseVisualStyleBackColor = false;
+            this.buttonCancelPrivateChat.Click += new System.EventHandler(this.buttonCancelPrivateChat_Click);
             // 
             // buttonInquiry
             // 
@@ -148,17 +142,23 @@ namespace ClientChat
             this.buttonInquiry.UseVisualStyleBackColor = false;
             this.buttonInquiry.Click += new System.EventHandler(this.buttonInquiry_Click);
             // 
-            // buttonCancelPrivateChat
+            // label3
             // 
-            this.buttonCancelPrivateChat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
-            this.buttonCancelPrivateChat.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonCancelPrivateChat.Location = new System.Drawing.Point(256, 45);
-            this.buttonCancelPrivateChat.Name = "buttonCancelPrivateChat";
-            this.buttonCancelPrivateChat.Size = new System.Drawing.Size(76, 32);
-            this.buttonCancelPrivateChat.TabIndex = 12;
-            this.buttonCancelPrivateChat.Text = "Cancel";
-            this.buttonCancelPrivateChat.UseVisualStyleBackColor = false;
-            this.buttonCancelPrivateChat.Click += new System.EventHandler(this.buttonCancelPrivateChat_Click);
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(40, 25);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(92, 17);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Enter Login";
+            // 
+            // textBoxName
+            // 
+            this.textBoxName.Location = new System.Drawing.Point(6, 45);
+            this.textBoxName.Multiline = true;
+            this.textBoxName.Name = "textBoxName";
+            this.textBoxName.Size = new System.Drawing.Size(162, 32);
+            this.textBoxName.TabIndex = 0;
             // 
             // Form1
             // 

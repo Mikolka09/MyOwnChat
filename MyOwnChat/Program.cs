@@ -7,8 +7,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using ProtocolsMessages;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MyOwnChat
 {
@@ -20,7 +21,7 @@ namespace MyOwnChat
         private static TcpListener server;
         private static string address = "127.0.0.1";
         private static int port = 1250;
-        private static string pathFile = "clients.dat";
+        private static string pathFile = "clients.json";
         private static List<Client> clientsFile;
         private static List<Client> clients;
         private static object lck;
@@ -85,6 +86,8 @@ namespace MyOwnChat
                                         clientSend = clients[clients.FindIndex((x) => x.Name == message[2])];
                                         Client clientReceive = new Client();
                                         clientReceive = clients[clients.FindIndex((x) => x.Name == message[3])];
+                                        string mess = $"[Private:{client.Name}]: " + message[0];
+                                        message[0] = mess;
                                         SendToPrivateMessage(clientSend, clientReceive, message);
                                     }
                                     else if (message[1] == "exit")
@@ -120,12 +123,9 @@ namespace MyOwnChat
         {
             lock (lck)
             {
-                foreach (var item in clients)
-                {
-                    if (item == clientReceive)
-                        Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Array = message }));
-                    break;
-                }
+                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = message }));
+                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataMessage() { Array = message }));
+
                 Console.WriteLine($"Private message has been sent: {clientSend.Name} from: {clientReceive.Name}");
             }
         }
@@ -189,22 +189,20 @@ namespace MyOwnChat
             }
         }
 
-        private static void SaveClients()
+        private static async void SaveClients()
         {
-            BinaryFormatter binary = new BinaryFormatter();
             using (FileStream fs = new FileStream(pathFile, FileMode.OpenOrCreate))
             {
-                binary.Serialize(fs, clientsFile);
+                await JsonSerializer.SerializeAsync(fs, clientsFile);
             }
         }
 
-        private static void LoadClients()
+        private static async void LoadClients()
         {
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            using (FileStream fs = new FileStream(pathFile, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new FileStream(pathFile, FileMode.Open))
             {
-                clientsFile = (List<Client>)formatter.Deserialize(fs);
+                var clients = await JsonSerializer.DeserializeAsync<List<Client>>(fs);
+                clientsFile = clients;
             }
         }
 
@@ -230,15 +228,15 @@ namespace MyOwnChat
     }
 
 
-    [Serializable]
+
     public class Client
     {
         public string Name { get; set; }
         public string Password { get; set; }
-        [NonSerialized]
-        public TcpClient ClientTcp;
-        [NonSerialized]
-        public IPEndPoint EndPointClient;
+        [JsonIgnore]
+        public TcpClient ClientTcp { get; set; }
+        [JsonIgnore]
+        public IPEndPoint EndPointClient { get; set; }
 
     }
 

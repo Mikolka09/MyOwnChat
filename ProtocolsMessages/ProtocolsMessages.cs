@@ -41,7 +41,11 @@ namespace ProtocolsMessages
                 return (Data)formatter.Deserialize(client.GetStream());
             }
             catch { throw; }
-            
+
         }
     }
+
+
+
+
 }

@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using ProtocolsMessages;
 
+
 namespace ClientChat
 {
     public partial class Form1 : Form
@@ -62,11 +63,11 @@ namespace ClientChat
                     {
                         try
                         {
-                            string[]mess = new string[4];
+                            string[] mess = new string[4];
                             mess = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
                             listViewMessages.Items.Add(mess[0]);
                         }
-                        catch (Exception) { throw; }
+                        catch (Exception) { }
                     }
                 });
             }
@@ -122,7 +123,6 @@ namespace ClientChat
                 message[0] = "";
                 message[1] = "exit";
                 buttonSend_Click(this, new EventArgs());
-                //Transfer.SendTCP(socket, new DataMessage() { Array = message });
                 socket.SendTimeout = 500;
                 socket.Close();
                 Close();
@@ -163,4 +163,6 @@ namespace ClientChat
             buttonCancelPrivateChat.Enabled = false;
         }
     }
+
+
 }

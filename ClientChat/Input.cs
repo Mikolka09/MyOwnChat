@@ -18,7 +18,7 @@ namespace ClientChat
     public partial class Input : Form
     {
         public string[] login { get; set; }
-        private TcpClient tcp;
+        public TcpClient tcp;
 
         public Input()
         {
@@ -27,9 +27,8 @@ namespace ClientChat
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            tcp = (Owner as Form1).socket;
-            Regex regLog = new Regex("^[A - zА - я]([A - z0 - 9А - я]{ 1, 9 })$");
-            Regex regPass = new Regex("^[A - zА - я]([A - z0 - 9А - я]{ 2, 8 })$");
+            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
+            Regex regPass = new Regex("^\\S{1,8}$");
             login = new string[2];
             if (!regLog.IsMatch(textBoxLogin.Text))
             {
@@ -70,9 +69,26 @@ namespace ClientChat
             return password;
         }
 
+        private void buttonReg_Click(object sender, EventArgs e)
+        {
+            this.Visible = false;
+            Registration reg = new Registration();
+            if (reg.ShowDialog(this) == DialogResult.OK)
+            {
+                login = reg.login;
+            }
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+
         private void buttonExit_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void Input_Load(object sender, EventArgs e)
+        {
+            tcp = (Owner as Form1).socket;
         }
     }
 }

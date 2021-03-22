@@ -27,7 +27,7 @@ namespace ClientChat
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            tcp = (Owner as Form1).socket;
+            tcp = (Owner as Input).tcp;
             login = new string[2];
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");

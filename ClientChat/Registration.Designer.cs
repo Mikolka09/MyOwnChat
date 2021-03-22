@@ -87,7 +87,7 @@ namespace ClientChat
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(90, 24);
+            this.label1.Location = new System.Drawing.Point(85, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(120, 18);
             this.label1.TabIndex = 7;
@@ -106,7 +106,7 @@ namespace ClientChat
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(65, 163);
+            this.label3.Location = new System.Drawing.Point(56, 163);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(174, 18);
             this.label3.TabIndex = 13;

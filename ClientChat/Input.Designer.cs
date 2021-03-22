@@ -35,15 +35,16 @@ namespace ClientChat
             this.buttonExit = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBoxPass = new System.Windows.Forms.TextBox();
+            this.buttonReg = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxLogin
             // 
             this.textBoxLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxLogin.Location = new System.Drawing.Point(42, 55);
+            this.textBoxLogin.Location = new System.Drawing.Point(34, 55);
             this.textBoxLogin.Multiline = true;
             this.textBoxLogin.Name = "textBoxLogin";
-            this.textBoxLogin.Size = new System.Drawing.Size(202, 34);
+            this.textBoxLogin.Size = new System.Drawing.Size(244, 34);
             this.textBoxLogin.TabIndex = 0;
             // 
             // label1
@@ -60,7 +61,7 @@ namespace ClientChat
             // 
             this.buttonOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonOK.Location = new System.Drawing.Point(26, 188);
+            this.buttonOK.Location = new System.Drawing.Point(12, 207);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(86, 33);
             this.buttonOK.TabIndex = 2;
@@ -72,7 +73,7 @@ namespace ClientChat
             // 
             this.buttonExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.buttonExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonExit.Location = new System.Drawing.Point(178, 188);
+            this.buttonExit.Location = new System.Drawing.Point(220, 207);
             this.buttonExit.Name = "buttonExit";
             this.buttonExit.Size = new System.Drawing.Size(86, 33);
             this.buttonExit.TabIndex = 3;
@@ -84,7 +85,7 @@ namespace ClientChat
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label2.Location = new System.Drawing.Point(62, 101);
+            this.label2.Location = new System.Drawing.Point(67, 101);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(165, 18);
             this.label2.TabIndex = 5;
@@ -93,18 +94,31 @@ namespace ClientChat
             // textBoxPass
             // 
             this.textBoxPass.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxPass.Location = new System.Drawing.Point(42, 122);
+            this.textBoxPass.Location = new System.Drawing.Point(34, 122);
             this.textBoxPass.Multiline = true;
             this.textBoxPass.Name = "textBoxPass";
             this.textBoxPass.PasswordChar = '*';
-            this.textBoxPass.Size = new System.Drawing.Size(202, 34);
+            this.textBoxPass.Size = new System.Drawing.Size(244, 34);
             this.textBoxPass.TabIndex = 1;
+            // 
+            // buttonReg
+            // 
+            this.buttonReg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.buttonReg.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonReg.Location = new System.Drawing.Point(84, 162);
+            this.buttonReg.Name = "buttonReg";
+            this.buttonReg.Size = new System.Drawing.Size(130, 33);
+            this.buttonReg.TabIndex = 6;
+            this.buttonReg.Text = "Registration";
+            this.buttonReg.UseVisualStyleBackColor = false;
+            this.buttonReg.Click += new System.EventHandler(this.buttonReg_Click);
             // 
             // Input
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 233);
+            this.ClientSize = new System.Drawing.Size(318, 256);
+            this.Controls.Add(this.buttonReg);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBoxPass);
             this.Controls.Add(this.buttonExit);
@@ -112,7 +126,8 @@ namespace ClientChat
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxLogin);
             this.Name = "Input";
-            this.Text = "INPUT CHAT";
+            this.Text = "AUTHORIZATION";
+            this.Load += new System.EventHandler(this.Input_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -126,5 +141,6 @@ namespace ClientChat
         private System.Windows.Forms.Button buttonExit;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxPass;
+        private System.Windows.Forms.Button buttonReg;
     }
 }

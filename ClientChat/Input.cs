@@ -50,7 +50,7 @@ namespace ClientChat
             Transfer.SendTCP(tcp, new DataMessage() { Array = login });
             if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
             {
-                MessageBox.Show("Login or password is not correct, please try again", "Warning",
+                MessageBox.Show("Login or password is not correct, or such a login is already in the chat", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLogin.Clear();
                 textBoxPass.Clear();
@@ -83,7 +83,14 @@ namespace ClientChat
 
         private void buttonExit_Click(object sender, EventArgs e)
         {
-            Close();
+            if (tcp.Connected)
+            {
+                tcp.SendTimeout = 500;
+                tcp.Close();
+                Close();
+            }
+            else
+                Close();
         }
 
         private void Input_Load(object sender, EventArgs e)

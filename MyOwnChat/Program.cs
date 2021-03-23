@@ -109,9 +109,10 @@ namespace MyOwnChat
 
                     }
                 }
-                catch (Exception)
+                catch (SocketException e)
                 {
-                    throw;
+                    if (e.SocketErrorCode == SocketError.Interrupted)
+                        throw;
                 }
             });
             Console.ReadKey();
@@ -161,7 +162,7 @@ namespace MyOwnChat
                 clients.Add(client);
                 SaveClients();
             }
-            else if (IdentificationClient(login))
+            else if (IdentificationClient(login) && !clients.Exists((x)=> x.Name == login[0]))
             {
                 Client client = new Client()
                 {
@@ -220,7 +221,7 @@ namespace MyOwnChat
         {
             foreach (var item in clientsFile)
             {
-                if (item.Name == name[0] || item.Password == name[1])
+                if (item.Name == name[0] && item.Password == name[1])
                     return true;
             }
             return false;

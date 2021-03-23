@@ -29,18 +29,25 @@ namespace ClientChat
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.buttonExit = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.buttonSend = new System.Windows.Forms.Button();
             this.listViewMessages = new System.Windows.Forms.ListView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItemAdd = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonCancelPrivateChat = new System.Windows.Forms.Button();
             this.buttonInquiry = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxName = new System.Windows.Forms.TextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.listViewContacts = new System.Windows.Forms.ListView();
+            this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonExit
@@ -59,7 +66,7 @@ namespace ClientChat
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(286, 102);
+            this.label1.Location = new System.Drawing.Point(143, 102);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(227, 18);
             this.label1.TabIndex = 4;
@@ -98,12 +105,33 @@ namespace ClientChat
             // 
             // listViewMessages
             // 
+            this.listViewMessages.ContextMenuStrip = this.contextMenuStrip1;
+            this.listViewMessages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listViewMessages.Location = new System.Drawing.Point(12, 123);
             this.listViewMessages.Name = "listViewMessages";
-            this.listViewMessages.Size = new System.Drawing.Size(776, 324);
+            this.listViewMessages.Size = new System.Drawing.Size(603, 324);
             this.listViewMessages.TabIndex = 9;
             this.listViewMessages.UseCompatibleStateImageBehavior = false;
             this.listViewMessages.View = System.Windows.Forms.View.List;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemAdd});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 30);
+            this.contextMenuStrip1.Click += new System.EventHandler(this.toolStripMenuItemAdd_Click);
+            // 
+            // toolStripMenuItemAdd
+            // 
+            this.toolStripMenuItemAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.toolStripMenuItemAdd.Checked = true;
+            this.toolStripMenuItemAdd.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripMenuItemAdd.Name = "toolStripMenuItemAdd";
+            this.toolStripMenuItemAdd.Size = new System.Drawing.Size(210, 26);
+            this.toolStripMenuItemAdd.Text = "Add to Conacts";
+            this.toolStripMenuItemAdd.Click += new System.EventHandler(this.toolStripMenuItemAdd_Click);
             // 
             // groupBox1
             // 
@@ -160,11 +188,31 @@ namespace ClientChat
             this.textBoxName.Size = new System.Drawing.Size(162, 32);
             this.textBoxName.TabIndex = 0;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.listViewContacts);
+            this.groupBox2.Location = new System.Drawing.Point(621, 105);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(167, 342);
+            this.groupBox2.TabIndex = 11;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "MY CONTACTS";
+            // 
+            // listViewContacts
+            // 
+            this.listViewContacts.Location = new System.Drawing.Point(7, 22);
+            this.listViewContacts.Name = "listViewContacts";
+            this.listViewContacts.Size = new System.Drawing.Size(151, 314);
+            this.listViewContacts.TabIndex = 0;
+            this.listViewContacts.UseCompatibleStateImageBehavior = false;
+            this.listViewContacts.View = System.Windows.Forms.View.List;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 501);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.listViewMessages);
             this.Controls.Add(this.buttonSend);
@@ -175,8 +223,10 @@ namespace ClientChat
             this.Name = "Form1";
             this.Text = "MYOWNCHAT";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -194,6 +244,10 @@ namespace ClientChat
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxName;
         private System.Windows.Forms.Button buttonCancelPrivateChat;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAdd;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ListView listViewContacts;
     }
 }
 

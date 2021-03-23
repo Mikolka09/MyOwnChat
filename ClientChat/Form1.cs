@@ -37,6 +37,7 @@ namespace ClientChat
         private List<Contact> tempContacts;
         private string pathFile = "contacts.json";
         private Random rand;
+        public Contact Cont;
 
         public Form1()
         {
@@ -72,20 +73,27 @@ namespace ClientChat
             ReceiveAsync();
         }
 
+        private void CreateTempContact(string log, string nm, string tg, Color color)
+        {
+            Contact cnt = new Contact()
+            {
+                Login = log,
+                Name = nm,
+                Tag = tg,
+                color = color
+            };
+            tempContacts.Add(cnt);
+        }
+       
         private Color ContactColor(string buff, Color color)
         {
             if (tempContacts.Count != 0)
             {
-                if (tempContacts.Exists((x) => x.Name == buff))
-                    return color = tempContacts.Find((x) => x.Name == buff).color;
+                if (tempContacts.Exists((x) => x.Login == buff))
+                    return color = tempContacts.Find((x) => x.Login == buff).color;
                 else if (!tempContacts.Exists((x) => x.color == color))
                 {
-                    Contact cnt1 = new Contact()
-                    {
-                        Name = buff,
-                        color = color
-                    };
-                    tempContacts.Add(cnt1);
+                    CreateTempContact(buff, "", "", color);
                     return color;
                 }
                 else
@@ -94,27 +102,16 @@ namespace ClientChat
                     {
                         color = RandColor();
                     }
-                    Contact cnt2 = new Contact()
-                    {
-                        Name = buff,
-                        color = color
-                    };
-                    tempContacts.Add(cnt2);
+                    CreateTempContact(buff, "", "", color);
                     return color;
                 }
             }
             else
             {
-                Contact cnt = new Contact()
-                {
-                    Name = buff,
-                    color = color
-                };
-                tempContacts.Add(cnt);
+                CreateTempContact(buff, "", "", color);
                 return color;
             }
         }
-
 
         private async void ReceiveAsync()
         {
@@ -129,17 +126,15 @@ namespace ClientChat
                         mess = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
                         string buff = mess[0];
                         Color color = RandColor();
-                        while (color == Color.White)
-                        {
-                            color = RandColor();
-                        }
                         color = ContactColor(mess[2], color);
-
+                        string dateTime = DateTime.Now.ToLongTimeString();
 
                         if (listViewMessages.InvokeRequired)
                         {
+                            listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(" ")));
+                            listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(dateTime)));
                             listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(buff)));
-                            listViewMessages.Invoke(new Action(() => listViewMessages.Items[count].ForeColor = color));
+                            listViewMessages.Invoke(new Action(() => listViewMessages.Items[count + 2].ForeColor = color));
                         }
                     }
                 });
@@ -157,6 +152,7 @@ namespace ClientChat
                 if (socket.Connected)
                 {
                     login = inp.login;
+                    Cont = new Contact();
                     message = new string[4];
                     contacts = new List<Contact>();
                     tempContacts = new List<Contact>();
@@ -171,9 +167,10 @@ namespace ClientChat
                     message[1] = "other";
                     message[2] = login[0];
                     message[3] = "";
+                    string dateTime = DateTime.Now.ToString();
                     listViewMessages.Items.Clear();
                     listViewMessages.Items.Add(
-                  "SERVER CONNEСTOR                                                                                                         ");
+                    "SERVER CONNEСTOR: " + dateTime + "                                                                         ");
                     listViewMessages.Items[0].ForeColor = Color.Red;
                     buttonSend.Enabled = true;
                     textBoxMessage.Enabled = true;
@@ -262,33 +259,37 @@ namespace ClientChat
 
         private void AddToListViewContacts()
         {
-            listViewContacts.Items.Clear();
+            listViewContacts.Columns.Clear();
             foreach (var item in contacts)
             {
-                listViewContacts.Items.Add(item.Name);
-                listViewContacts.Items[contacts.FindIndex((x) => x.Name == item.Name)].ForeColor = item.color;
+                ListViewItem it = new ListViewItem(item.Login);
+                it.SubItems.Add(item.Name);
             }
         }
 
         private void toolStripMenuItemAdd_Click(object sender, EventArgs e)
         {
-            Contact contact = new Contact();
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
             string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
-            contact.Name = str[0];
-            contact.color = tempContacts[tempContacts.FindIndex((x) => x.Name == contact.Name)].color;
+            Cont.Login = str[0];
+            Cont.color = tempContacts[tempContacts.FindIndex((x) => x.Login == Cont.Login)].color;
+            EditContact editContact = new EditContact();
+            if (editContact.ShowDialog(this) == DialogResult.OK)
+            {
+                Cont = editContact.contact;
+            }
             if (contacts.Count == 0)
             {
-                contacts.Add(contact);
+                contacts.Add(Cont);
                 SaveContacts();
             }
-            else if (!contacts.Exists((x) => x.Name == contact.Name))
+            else if (!contacts.Exists((x) => x.Login == Cont.Login))
             {
-                while (contacts.Exists((x) => x.color == contact.color))
+                while (contacts.Exists((x) => x.color == Cont.color))
                 {
-                    contact.color = RandColor();
+                    Cont.color = RandColor();
                 }
-                contacts.Add(contact);
+                contacts.Add(Cont);
                 SaveContacts();
             }
 
@@ -315,7 +316,9 @@ namespace ClientChat
 
     public class Contact
     {
+        public string Login { get; set; }
         public string Name { get; set; }
+        public string Tag { get; set; }
         public Color color { get; set; }
     }
 }

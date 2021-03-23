@@ -45,6 +45,8 @@ namespace ClientChat
             this.textBoxName = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.listViewContacts = new System.Windows.Forms.ListView();
+            this.columnLogin = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -109,7 +111,7 @@ namespace ClientChat
             this.listViewMessages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listViewMessages.Location = new System.Drawing.Point(12, 123);
             this.listViewMessages.Name = "listViewMessages";
-            this.listViewMessages.Size = new System.Drawing.Size(603, 324);
+            this.listViewMessages.Size = new System.Drawing.Size(567, 324);
             this.listViewMessages.TabIndex = 9;
             this.listViewMessages.UseCompatibleStateImageBehavior = false;
             this.listViewMessages.View = System.Windows.Forms.View.List;
@@ -129,7 +131,7 @@ namespace ClientChat
             this.toolStripMenuItemAdd.Checked = true;
             this.toolStripMenuItemAdd.CheckState = System.Windows.Forms.CheckState.Checked;
             this.toolStripMenuItemAdd.Name = "toolStripMenuItemAdd";
-            this.toolStripMenuItemAdd.Size = new System.Drawing.Size(210, 26);
+            this.toolStripMenuItemAdd.Size = new System.Drawing.Size(180, 26);
             this.toolStripMenuItemAdd.Text = "Add to Conacts";
             this.toolStripMenuItemAdd.Click += new System.EventHandler(this.toolStripMenuItemAdd_Click);
             // 
@@ -191,21 +193,35 @@ namespace ClientChat
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.listViewContacts);
-            this.groupBox2.Location = new System.Drawing.Point(621, 105);
+            this.groupBox2.Location = new System.Drawing.Point(585, 105);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(167, 342);
+            this.groupBox2.Size = new System.Drawing.Size(203, 342);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "MY CONTACTS";
             // 
             // listViewContacts
             // 
+            this.listViewContacts.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnLogin,
+            this.columnName});
+            this.listViewContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listViewContacts.Location = new System.Drawing.Point(7, 22);
             this.listViewContacts.Name = "listViewContacts";
-            this.listViewContacts.Size = new System.Drawing.Size(151, 314);
+            this.listViewContacts.Size = new System.Drawing.Size(190, 314);
             this.listViewContacts.TabIndex = 0;
             this.listViewContacts.UseCompatibleStateImageBehavior = false;
-            this.listViewContacts.View = System.Windows.Forms.View.List;
+            this.listViewContacts.View = System.Windows.Forms.View.Details;
+            // 
+            // columnLogin
+            // 
+            this.columnLogin.Text = "LOGIN";
+            this.columnLogin.Width = 81;
+            // 
+            // columnName
+            // 
+            this.columnName.Text = "NAME";
+            this.columnName.Width = 87;
             // 
             // Form1
             // 
@@ -248,6 +264,8 @@ namespace ClientChat
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAdd;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ListView listViewContacts;
+        private System.Windows.Forms.ColumnHeader columnLogin;
+        private System.Windows.Forms.ColumnHeader columnName;
     }
 }
 

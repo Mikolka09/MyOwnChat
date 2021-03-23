@@ -46,9 +46,11 @@ namespace ClientChat
             }
             else
                 login[1] = Hash(textBoxPass.Text);
-
+            string answer = "";
             Transfer.SendTCP(tcp, new DataMessage() { Array = login });
-            if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
+            answer = ((DataMessage)Transfer.ReceiveTCP(tcp)).Message;
+            
+            if (answer == "No")
             {
                 MessageBox.Show("Login or password is not correct, or such a login is already in the chat", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);

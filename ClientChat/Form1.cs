@@ -13,7 +13,7 @@ using ProtocolsMessages;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Threading;
-
+using System.Text.RegularExpressions;
 
 namespace ClientChat
 {
@@ -37,6 +37,8 @@ namespace ClientChat
         private Random rand;
         public Contact Cont;
         private bool sort = true;
+        private static int countMess = 0;
+        private static string logs;
 
         public Form1()
         {
@@ -123,6 +125,7 @@ namespace ClientChat
                         int count = listViewMessages.Items.Count;
                         string[] mess = new string[4];
                         mess = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
+                        CheckReceives(mess);
                         string buff = mess[0];
                         Color color = RandColor();
                         color = ContactColor(mess[2], color);
@@ -139,6 +142,61 @@ namespace ClientChat
                 });
             }
             catch (Exception) { throw; }
+        }
+
+        private void CheckReceives(string[] mess)
+        {
+            string messCheck = mess[1];
+            switch (messCheck)
+            {
+                case "group":
+                    string log = mess[2];
+                    if (log == login[0])
+                    {
+                        logs = mess[3];
+                        string[] messAns = new string[4];
+                        string regex = "\\b" + $"{login[0]}" + "\\b";
+                        logs = Regex.Replace(logs, regex, log);
+                        messAns[1] = "group";
+                        messAns[2] = login[0];
+                        messAns[3] = logs;
+                        message = messAns;
+                    }
+                    else
+                    {
+                        if (countMess == 0)
+                        {
+                            if (MessageBox.Show($"{log} sent a request for a group chat", "Inquiry", MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Question) == DialogResult.OK)
+                            {
+                                countMess++;
+                                string[] messAns = new string[4];
+                                logs = mess[3];
+                                string regex = "\\b" + $"{login[0]}" + "\\b";
+                                logs = Regex.Replace(logs, regex, log);
+                                messAns[1] = "group";
+                                messAns[2] = login[0];
+                                messAns[3] = logs;
+                                message = messAns;
+                                if (checkBoxGroups.InvokeRequired)
+                                    checkBoxGroups.Invoke(new Action(() => checkBoxGroups.Checked = true));
+                            }
+                            else
+                            {
+                                string[] messAns = new string[4];
+                                messAns[0] = "Sorry, i can't, busy!";
+                                messAns[1] = "private";
+                                messAns[2] = login[0];
+                                messAns[3] = log;
+                                Transfer.SendTCP(socket, new DataMessage() { Array = messAns });
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -253,6 +311,7 @@ namespace ClientChat
             {
                 ListViewItem it = new ListViewItem(item.Login);
                 it.SubItems.Add(item.Name);
+                it.SubItems.Add(item.Tag);
                 listViewContacts.Items.Add(it);
             }
             buttonSaveContacts.Enabled = true;
@@ -418,9 +477,33 @@ namespace ClientChat
             }
         }
 
-        private void groupChatToolStripMenuItem_Click(object sender, EventArgs e)
+        private void checkBoxGroups_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (checkBoxGroups.Checked)
+            {
+                string logins = "";
+                ListView.CheckedListViewItemCollection selectedList = listViewContacts.CheckedItems;
+                for (int i = 0; i < selectedList.Count; i++)
+                {
+                    if (i < selectedList.Count - 1)
+                        logins += selectedList[i].Text + " ";
+                    else
+                        logins += selectedList[i].Text;
+                }
+                message[1] = "group";
+                message[2] = login[0];
+                if (logins != "")
+                    message[3] = logins;
+                else
+                    message[3] = logs;
+            }
+            else
+            {
+                message[1] = "other";
+                message[2] = login[0];
+                message[3] = "";
+                countMess = 0;
+            }
         }
     }
 

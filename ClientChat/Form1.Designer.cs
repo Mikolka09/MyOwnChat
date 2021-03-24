@@ -39,6 +39,7 @@ namespace ClientChat
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonCancelPrivateChat = new System.Windows.Forms.Button();
             this.buttonInquiry = new System.Windows.Forms.Button();
@@ -52,8 +53,8 @@ namespace ClientChat
             this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupChatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.columnTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.checkBoxGroups = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -117,7 +118,7 @@ namespace ClientChat
             this.listViewMessages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listViewMessages.Location = new System.Drawing.Point(12, 123);
             this.listViewMessages.Name = "listViewMessages";
-            this.listViewMessages.Size = new System.Drawing.Size(567, 324);
+            this.listViewMessages.Size = new System.Drawing.Size(524, 324);
             this.listViewMessages.TabIndex = 9;
             this.listViewMessages.UseCompatibleStateImageBehavior = false;
             this.listViewMessages.View = System.Windows.Forms.View.List;
@@ -129,24 +130,30 @@ namespace ClientChat
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editToolStripMenuItem,
             this.deleteToolStripMenuItem,
-            this.addToolStripMenuItem,
-            this.groupChatToolStripMenuItem});
+            this.addToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(211, 128);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(123, 76);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
             this.editToolStripMenuItem.Text = "Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
+            // addToolStripMenuItem
+            // 
+            this.addToolStripMenuItem.Name = "addToolStripMenuItem";
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            this.addToolStripMenuItem.Text = "Add";
+            this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
             // 
             // groupBox1
             // 
@@ -205,12 +212,13 @@ namespace ClientChat
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.checkBoxGroups);
             this.groupBox2.Controls.Add(this.buttonLoadContacts);
             this.groupBox2.Controls.Add(this.buttonSaveContacts);
             this.groupBox2.Controls.Add(this.listViewContacts);
-            this.groupBox2.Location = new System.Drawing.Point(585, 105);
+            this.groupBox2.Location = new System.Drawing.Point(542, 105);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(203, 342);
+            this.groupBox2.Size = new System.Drawing.Size(246, 342);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "MY CONTACTS";
@@ -219,9 +227,9 @@ namespace ClientChat
             // 
             this.buttonLoadContacts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.buttonLoadContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonLoadContacts.Location = new System.Drawing.Point(121, 297);
+            this.buttonLoadContacts.Location = new System.Drawing.Point(73, 297);
             this.buttonLoadContacts.Name = "buttonLoadContacts";
-            this.buttonLoadContacts.Size = new System.Drawing.Size(76, 32);
+            this.buttonLoadContacts.Size = new System.Drawing.Size(65, 32);
             this.buttonLoadContacts.TabIndex = 14;
             this.buttonLoadContacts.Text = "Load";
             this.buttonLoadContacts.UseVisualStyleBackColor = false;
@@ -231,9 +239,9 @@ namespace ClientChat
             // 
             this.buttonSaveContacts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonSaveContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonSaveContacts.Location = new System.Drawing.Point(7, 297);
+            this.buttonSaveContacts.Location = new System.Drawing.Point(6, 297);
             this.buttonSaveContacts.Name = "buttonSaveContacts";
-            this.buttonSaveContacts.Size = new System.Drawing.Size(76, 32);
+            this.buttonSaveContacts.Size = new System.Drawing.Size(61, 32);
             this.buttonSaveContacts.TabIndex = 13;
             this.buttonSaveContacts.Text = "Save";
             this.buttonSaveContacts.UseVisualStyleBackColor = false;
@@ -244,12 +252,14 @@ namespace ClientChat
             this.listViewContacts.CheckBoxes = true;
             this.listViewContacts.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnLogin,
-            this.columnName});
+            this.columnName,
+            this.columnTag});
             this.listViewContacts.ContextMenuStrip = this.contextMenuStrip1;
-            this.listViewContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.listViewContacts.Location = new System.Drawing.Point(7, 22);
+            this.listViewContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.listViewContacts.FullRowSelect = true;
+            this.listViewContacts.Location = new System.Drawing.Point(6, 22);
             this.listViewContacts.Name = "listViewContacts";
-            this.listViewContacts.Size = new System.Drawing.Size(190, 269);
+            this.listViewContacts.Size = new System.Drawing.Size(234, 269);
             this.listViewContacts.TabIndex = 0;
             this.listViewContacts.UseCompatibleStateImageBehavior = false;
             this.listViewContacts.View = System.Windows.Forms.View.Details;
@@ -258,32 +268,33 @@ namespace ClientChat
             // columnLogin
             // 
             this.columnLogin.Text = "LOGIN";
-            this.columnLogin.Width = 74;
+            this.columnLogin.Width = 63;
             // 
             // columnName
             // 
             this.columnName.Text = "NAME";
-            this.columnName.Width = 77;
+            this.columnName.Width = 63;
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // addToolStripMenuItem
+            // columnTag
             // 
-            this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
-            this.addToolStripMenuItem.Text = "Add";
-            this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
+            this.columnTag.Text = "TAG";
+            this.columnTag.Width = 71;
             // 
-            // groupChatToolStripMenuItem
+            // checkBoxGroups
             // 
-            this.groupChatToolStripMenuItem.Checked = true;
-            this.groupChatToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.groupChatToolStripMenuItem.Name = "groupChatToolStripMenuItem";
-            this.groupChatToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
-            this.groupChatToolStripMenuItem.Text = "GroupChat";
-            this.groupChatToolStripMenuItem.Click += new System.EventHandler(this.groupChatToolStripMenuItem_Click);
+            this.checkBoxGroups.AutoSize = true;
+            this.checkBoxGroups.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.checkBoxGroups.Location = new System.Drawing.Point(154, 304);
+            this.checkBoxGroups.Name = "checkBoxGroups";
+            this.checkBoxGroups.Size = new System.Drawing.Size(83, 21);
+            this.checkBoxGroups.TabIndex = 15;
+            this.checkBoxGroups.Text = "Groups";
+            this.checkBoxGroups.UseVisualStyleBackColor = true;
+            this.checkBoxGroups.CheckedChanged += new System.EventHandler(this.checkBoxGroups_CheckedChanged);
             // 
             // Form1
             // 
@@ -305,6 +316,7 @@ namespace ClientChat
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -334,7 +346,8 @@ namespace ClientChat
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem groupChatToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader columnTag;
+        private System.Windows.Forms.CheckBox checkBoxGroups;
     }
 }
 

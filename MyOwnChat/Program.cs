@@ -44,23 +44,20 @@ namespace MyOwnChat
 
             Console.WriteLine($"Server started: {endPoint.Address} : {endPoint.Port}");
 
-           Task.Run(() =>
-              {
-                  try
-                  {
-                      while (true)
-                      {
+            Task.Run(() =>
+            {
+                try
+                {
+                    while (true)
+                    {
 
-                          TcpClient socket = server.AcceptTcpClient();
-                          var task = Task.Run(() => Start(socket, tokenStop.Token));
-                      }
-                  }
-                  catch (SocketException e)
-                  {
-                      if (e.SocketErrorCode == SocketError.Interrupted)
-                          throw;
-                  }
-              });
+                        TcpClient socket = server.AcceptTcpClient();
+                        var task = Task.Run(() => Start(socket, tokenStop.Token));
+                    }
+                }
+                catch { }
+
+            });
             Console.ReadKey();
             Console.WriteLine("Server stoping...");
             server.Stop();
@@ -78,60 +75,52 @@ namespace MyOwnChat
                 while (!token.IsCancellationRequested)
                 {
                     await Task.Delay(500, token);
-                    Client client = new Client();
-                    string[] login = new string[2];
-                    login = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                    LoginCheck(socket, login);
-                    if (!token.IsCancellationRequested)
-                    {
-                        client = clients[clients.FindIndex((x) => x.Name == login[0])];
-                        Console.WriteLine($"Client connected with Name: {client.Name} and IP: {client.EndPointClient.Address}");
-                        messEveryone[0] = $"{client.Name} joined to chat";
-                        SendToEveryone(client, messEveryone);
-                    }
-
-                    try
-                    {
-                        while (!token.IsCancellationRequested)
-                        {
-                            await Task.Delay(500, token);
-                            string[] message = new string[4];
-                            message = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                            if (message[1] == "other")
-                            {
-                                string mess = $"[{client.Name}]: " + message[0];
-                                message[0] = mess;
-                                Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
-                                SendToEveryone(client, message);
-                            }
-                            else if (message[1] == "private")
-                            {
-                                Client clientSend = new Client();
-                                clientSend = clients[clients.FindIndex((x) => x.Name == message[2])];
-                                Client clientReceive = new Client();
-                                clientReceive = clients[clients.FindIndex((x) => x.Name == message[3])];
-                                string mess = $"[Private: {client.Name}]: " + message[0];
-                                message[0] = mess;
-                                SendToPrivateMessage(clientSend, clientReceive, message);
-                            }
-                            else if (message[1] == "exit")
-                            {
-                                Console.WriteLine($"Client passed out with Name: {client.Name} and IP: {client.EndPointClient.Address}");
-                                messEveryone[0] = $"{client.Name} left to chat";
-                                SendToEveryone(client, messEveryone);
-                                Cancel();
-                            }
-                        }
-                    }
-                    catch (SocketException e)
-                    {
-                        if (e.SocketErrorCode == SocketError.Interrupted)
-                            throw;
-                    }
+                    string[] message = new string[4];
+                    message = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
+                    ServerMediator(socket, message);
                 }
             }
             catch (OperationCanceledException) { }
             catch (Exception) { }
+        }
+
+        private static void ServerMediator(TcpClient socket, string[] message)
+        {
+            Client client = new Client();
+            if (message[1] == "avtorization" && LoginCheck(socket, message))
+            {
+                client = clients[clients.FindIndex((x) => x.Name == message[0])];
+                Console.WriteLine($"Client connected with Name: {client.Name} and IP: {client.EndPointClient.Address}");
+                messEveryone[0] = $"{client.Name} joined to chat";
+                SendToEveryone(client, messEveryone);
+            }
+            else if (message[1] == "other")
+            {
+                client = clients[clients.FindIndex((x) => x.Name == message[2])];
+                string mess = $"[{client.Name}]: " + message[0];
+                message[0] = mess;
+                Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
+                SendToEveryone(client, message);
+            }
+            else if (message[1] == "private")
+            {
+                Client clientSend = new Client();
+                clientSend = clients[clients.FindIndex((x) => x.Name == message[2])];
+                Client clientReceive = new Client();
+                clientReceive = clients[clients.FindIndex((x) => x.Name == message[3])];
+                string mess = $"[Private: {clientSend.Name}]: " + message[0];
+                message[0] = mess;
+                SendToPrivateMessage(clientSend, clientReceive, message);
+            }
+            else if (message[1] == "exit")
+            {
+                client = clients[clients.FindIndex((x) => x.Name == message[2])];  
+                Console.WriteLine($"Client passed out with Name: {client.Name} and IP: {client.EndPointClient.Address}");
+                messEveryone[0] = $"{client.Name} left to chat";
+                SendToEveryone(client, messEveryone);
+                clients.RemoveAt(clients.FindIndex((x) => x.Name == message[2]));
+                // Cancel();
+            }
         }
 
         private static void SendToPrivateMessage(Client clientSend, Client clientReceive, string[] message)
@@ -145,15 +134,14 @@ namespace MyOwnChat
             }
         }
 
-
-        private static void LoginCheck(TcpClient socket, string[] login)
+        private static bool LoginCheck(TcpClient socket, string[] login)
         {
             if (clientsFile.Count == 0)
             {
                 Client client = new Client()
                 {
                     Name = login[0],
-                    Password = login[1],
+                    Password = login[2],
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
@@ -161,13 +149,14 @@ namespace MyOwnChat
                 clientsFile.Add(client);
                 clients.Add(client);
                 SaveClients();
+                return true;
             }
             else if (!ClientExist(login[0]))
             {
                 Client client = new Client()
                 {
                     Name = login[0],
-                    Password = login[1],
+                    Password = login[2],
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
@@ -175,24 +164,29 @@ namespace MyOwnChat
                 clientsFile.Add(client);
                 clients.Add(client);
                 SaveClients();
+                return true;
             }
             else if (IdentificationClient(login) && !clients.Exists((x) => x.Name == login[0]))
             {
                 Client client = new Client()
                 {
                     Name = login[0],
-                    Password = login[1],
+                    Password = login[2],
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
 
                 clients.Add(client);
+                return true;
             }
             else
             {
-                Transfer.SendTCP(socket, new DataMessage() { Message = "No" });
-                Cancel();
+                string[] mess = new string[4];
+                mess[3] = "No";
+                Transfer.SendTCP(socket, new DataMessage() { Array = mess });
+                return false;
             }
+
         }
 
         private static void SendToEveryone(Client client, string[] message)
@@ -238,7 +232,7 @@ namespace MyOwnChat
         {
             foreach (var item in clientsFile)
             {
-                if (item.Name == name[0] && item.Password == name[1])
+                if (item.Name == name[0] && item.Password == name[2])
                     return true;
             }
             return false;

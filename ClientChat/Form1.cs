@@ -10,8 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using ProtocolsMessages;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Threading;
 
@@ -35,9 +34,9 @@ namespace ClientChat
         private string[] message;
         private List<Contact> contacts;
         private List<Contact> tempContacts;
-        private string pathFile = "contacts.json";
         private Random rand;
         public Contact Cont;
+        private bool sort = true;
 
         public Form1()
         {
@@ -84,7 +83,7 @@ namespace ClientChat
             };
             tempContacts.Add(cnt);
         }
-       
+
         private Color ContactColor(string buff, Color color)
         {
             if (tempContacts.Count != 0)
@@ -152,28 +151,18 @@ namespace ClientChat
                 if (socket.Connected)
                 {
                     login = inp.login;
-                    Cont = new Contact();
                     message = new string[4];
                     contacts = new List<Contact>();
                     tempContacts = new List<Contact>();
-                    if (File.Exists(pathFile))
-                    {
-                        LoadContacts();
-                        foreach (var item in contacts)
-                        {
-                            tempContacts.Add(item);
-                        }
-                    }
                     message[1] = "other";
                     message[2] = login[0];
                     message[3] = "";
-                    string dateTime = DateTime.Now.ToString();
                     listViewMessages.Items.Clear();
-                    listViewMessages.Items.Add(
-                    "SERVER CONNEСTOR: " + dateTime + "                                                                         ");
+                    listViewMessages.Items.Add("SERVER CONNEСTOR: " + DateTime.Now.ToString() + "          ");
                     listViewMessages.Items[0].ForeColor = Color.Red;
                     buttonSend.Enabled = true;
                     textBoxMessage.Enabled = true;
+                    buttonSaveContacts.Enabled = false;
                     this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
                     HideHorizontalScrollBar();
                     if (contacts.Count != 0)
@@ -259,16 +248,20 @@ namespace ClientChat
 
         private void AddToListViewContacts()
         {
-            listViewContacts.Columns.Clear();
+            listViewContacts.Items.Clear();
             foreach (var item in contacts)
             {
                 ListViewItem it = new ListViewItem(item.Login);
                 it.SubItems.Add(item.Name);
+                listViewContacts.Items.Add(it);
             }
+            buttonSaveContacts.Enabled = true;
+            buttonLoadContacts.Enabled = false;
         }
 
         private void toolStripMenuItemAdd_Click(object sender, EventArgs e)
         {
+            Cont = new Contact();
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
             string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
             Cont.Login = str[0];
@@ -281,7 +274,6 @@ namespace ClientChat
             if (contacts.Count == 0)
             {
                 contacts.Add(Cont);
-                SaveContacts();
             }
             else if (!contacts.Exists((x) => x.Login == Cont.Login))
             {
@@ -290,30 +282,149 @@ namespace ClientChat
                     Cont.color = RandColor();
                 }
                 contacts.Add(Cont);
-                SaveContacts();
             }
-
             AddToListViewContacts();
         }
 
-        private async void SaveContacts()
+        private void SaveContacts(string pathFile)
         {
+            BinaryFormatter br = new BinaryFormatter();
             using (FileStream fs = new FileStream(pathFile, FileMode.OpenOrCreate))
             {
-                await JsonSerializer.SerializeAsync(fs, contacts);
+                br.Serialize(fs, contacts);
             }
         }
 
-        private async void LoadContacts()
+        private void LoadContacts(string pathFile)
         {
+            BinaryFormatter br = new BinaryFormatter();
             using (FileStream fs = new FileStream(pathFile, FileMode.Open))
             {
-                var cnt = await JsonSerializer.DeserializeAsync<List<Contact>>(fs);
+                var cnt = (List<Contact>)br.Deserialize(fs);
                 contacts = cnt;
+                AddToListViewContacts();
             }
+        }
+
+        private void buttonSaveContacts_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.DefaultExt = ".dat";
+            saveFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string pathFile = saveFileDialog1.FileName;
+                SaveContacts(pathFile);
+                MessageBox.Show("Contacts Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void buttonLoadContacts_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string pathFile = openFileDialog1.FileName;
+                LoadContacts(pathFile);
+            }
+        }
+
+        private void listViewContacts_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            if (e.Column == 0 && sort == true)
+            {
+                contacts.Sort(new LoginComparer());
+                sort = false;
+            }
+            else if (e.Column == 0 && sort == false)
+            {
+                contacts.Sort(new LoginComparer());
+                contacts.Reverse();
+                sort = true;
+            }
+            if (e.Column == 1 && sort == true)
+            {
+                contacts.Sort(new NameComparer());
+                sort = false;
+            }
+            else if (e.Column == 1 && sort == false)
+            {
+                contacts.Sort(new NameComparer());
+                contacts.Reverse();
+                sort = true;
+            }
+            AddToListViewContacts();
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Cont = new Contact();
+            ListViewItem item = listViewContacts.SelectedItems[0];
+            Cont.Login = item.SubItems[0].Text;
+            Cont.Name = item.SubItems[1].Text;
+            Cont.Tag = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].Tag;
+            Cont.color = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].color;
+            EditContact edit = new EditContact();
+            if (edit.ShowDialog(this) == DialogResult.OK)
+            {
+                int k = 0;
+                for (int i = 0; i < contacts.Count; i++)
+                {
+                    if (contacts[i].Login == Cont.Login)
+                    {
+                        k = i;
+                        break;
+                    }
+                }
+                contacts.RemoveAt(k);
+                contacts.Add(edit.contact);
+                AddToListViewContacts();
+                MessageBox.Show("Contact Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Cont = new Contact();
+            ListViewItem item = listViewContacts.SelectedItems[0];
+            Cont.Login = item.SubItems[0].Text;
+            int k = 0;
+            for (int i = 0; i < contacts.Count; i++)
+            {
+                if (contacts[i].Login == Cont.Login)
+                {
+                    k = i;
+                    break;
+                }
+            }
+            contacts.RemoveAt(k);
+            AddToListViewContacts();
+            MessageBox.Show("Contact Deleted!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void addToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Cont = new Contact();
+            Cont.Login = "";
+            Cont.Name = "";
+            Cont.Tag = "";
+            Cont.color = RandColor(); ;
+            EditContact edit = new EditContact();
+            if (edit.ShowDialog(this) == DialogResult.OK)
+            {
+                contacts.Add(edit.contact);
+                AddToListViewContacts();
+                MessageBox.Show("Contact Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void groupChatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
+    [Serializable]
     public class Contact
     {
         public string Login { get; set; }
@@ -321,4 +432,21 @@ namespace ClientChat
         public string Tag { get; set; }
         public Color color { get; set; }
     }
+
+    class LoginComparer : IComparer<Contact>
+    {
+        public int Compare(Contact x, Contact y)
+        {
+            return string.Compare(x.Login, y.Login);
+        }
+    }
+
+    class NameComparer : IComparer<Contact>
+    {
+        public int Compare(Contact x, Contact y)
+        {
+            return string.Compare(x.Name, y.Name);
+        }
+    }
+
 }

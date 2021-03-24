@@ -28,7 +28,7 @@ namespace ClientChat
         private void buttonOK_Click(object sender, EventArgs e)
         {
             tcp = (Owner as Input).tcp;
-            login = new string[2];
+            login = new string[4];
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");
             bool res = true;
@@ -42,6 +42,7 @@ namespace ClientChat
                 }
                 else
                     login[0] = textBoxLogin.Text;
+                login[1] = "avtorization";
                 if (!regPass.IsMatch(textBoxPass.Text))
                 {
                     MessageBox.Show("Password entered incorrectly", "Warning",
@@ -57,11 +58,12 @@ namespace ClientChat
                         textBoxPass.Clear();
                         textBoxRepeat.Clear();
                     }
-                    login[1] = Hash(textBoxPass.Text);
+                    login[2] = Hash(textBoxPass.Text);
                 }
-                
+                string[] answer = new string[4];
                 Transfer.SendTCP(tcp, new DataMessage() { Array = login });
-                if (((DataMessage)Transfer.ReceiveTCP(tcp)).Message == "No")
+                answer = ((DataMessage)Transfer.ReceiveTCP(tcp)).Array;
+                if (answer[3] == "No")
                 {
                     MessageBox.Show("There is such a Login. Please enter a different Login", "Warning",
                                             MessageBoxButtons.OK, MessageBoxIcon.Warning);

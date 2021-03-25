@@ -40,7 +40,10 @@ namespace ClientChat
         private int countMess = 0;
         private string logs;
         private string exp;
+        private string tagMessage;
         private List<byte[]> fileByte;
+        public DataClient data;
+        public Client client;
 
         public Form1()
         {
@@ -60,6 +63,7 @@ namespace ClientChat
             }
             catch (Exception)
             {
+
                 MessageBox.Show("SERVER IS NOT CONNECTOR", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Close();
             }
@@ -214,42 +218,59 @@ namespace ClientChat
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            login = new string[2];
+            login = new string[5];
             ConnectServer();
             Input inp = new Input();
-            if (inp.ShowDialog(this) == DialogResult.OK)
+            try
             {
-                if (socket.Connected)
+                if (inp.ShowDialog(this) == DialogResult.OK)
                 {
-                    login = inp.login;
-                    message = new string[4];
-                    contacts = new List<Contact>();
-                    tempContacts = new List<Contact>();
-                    fileByte = new List<byte[]>();
-                    message[1] = "other";
-                    message[2] = login[0];
-                    message[3] = "";
-                    listViewMessages.Items.Clear();
-                    listViewMessages.Items.Add("SERVER CONNEСTOR: " + DateTime.Now.ToString() + "          ");
-                    listViewMessages.Items[0].ForeColor = Color.Red;
-                    buttonSend.Enabled = true;
-                    textBoxMessage.Enabled = true;
-                    buttonSaveContacts.Enabled = false;
-                    buttonLoadFile.Enabled = false;
-                    textBoxFileName.Enabled = false;
-                    this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
-                    HideHorizontalScrollBar();
-                    if (contacts.Count != 0)
-                        AddToListViewContacts();
-                    StartChat();
+                    if (socket.Connected)
+                    {
+                        login = inp.login;
+                        if (login[0] == "Admin")
+                        {
+                            data = new DataClient();
+                            data.clientsFile = new List<Client>();
+                            listViewContacts.Visible = false;
+                            listViewClients.Visible = true;
+                            checkBoxGroups.Visible = false;
+                            groupBox2.Text = "CONTACTS CLIENTS";
+                        }
+                        else
+                        {
+                            checkBoxGroups.Visible = true;
+                            listViewContacts.Visible = true;
+                            listViewClients.Visible = false;
+                            groupBox2.Text = "MY CONTACTS";
+                        }
+                        message = new string[4];
+                        contacts = new List<Contact>();
+                        tempContacts = new List<Contact>();
+                        fileByte = new List<byte[]>();
+                        message[1] = "other";
+                        message[2] = login[0];
+                        message[3] = "";
+                        listViewMessages.Items.Clear();
+                        listViewMessages.Items.Add("SERVER CONNEСTOR: " + DateTime.Now.ToString() + "          ");
+                        listViewMessages.Items[0].ForeColor = Color.Red;
+                        buttonSend.Enabled = true;
+                        textBoxMessage.Enabled = true;
+                        buttonSaveContacts.Enabled = false;
+                        buttonLoadFile.Enabled = false;
+                        textBoxFileName.Enabled = false;
+                        this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
+                        HideHorizontalScrollBar();
+                        StartChat();
+                    }
+                }
+                else
+                {
+                    inp.Close();
+                    Close();
                 }
             }
-            else
-            {
-                inp.Close();
-                Close();
-            }
-
+            catch { }
         }
 
         private void buttonSend_Click(object sender, EventArgs e)
@@ -344,12 +365,29 @@ namespace ClientChat
             buttonLoadContacts.Enabled = false;
         }
 
+        private void AddToListViewClients()
+        {
+            listViewClients.Items.Clear();
+            foreach (var item in data.clientsFile)
+            {
+                if (item.Name != "Admin")
+                {
+                    ListViewItem it = new ListViewItem(item.Name);
+                    it.SubItems.Add(item.CountBadWord.ToString());
+                    it.SubItems.Add(item.Birthday);
+                    listViewClients.Items.Add(it);
+                }
+            }
+            buttonSaveContacts.Enabled = true;
+            buttonLoadContacts.Enabled = false;
+        }
+
         private void toolStripMenuItemAdd_Click(object sender, EventArgs e)
         {
             Cont = new Contact();
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
             string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
-            if (str.Length == 2)
+            if (str.Length > 2)
                 Cont.Login = str[0].Split()[1];
             else
                 Cont.Login = str[0];
@@ -396,114 +434,209 @@ namespace ClientChat
 
         private void buttonSaveContacts_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.DefaultExt = ".dat";
-            saveFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            if (login[0] == "Admin")
             {
-                string pathFile = saveFileDialog1.FileName;
-                SaveContacts(pathFile);
-                MessageBox.Show("Contacts Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                BinarySaveLoad.SaveClients(data);
+                MessageBox.Show("Clients Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                saveFileDialog1.DefaultExt = ".dat";
+                saveFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string pathFile = saveFileDialog1.FileName;
+                    SaveContacts(pathFile);
+                    MessageBox.Show("Contacts Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
 
         private void buttonLoadContacts_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            if (login[0] == "Admin")
             {
-                string pathFile = openFileDialog1.FileName;
-                LoadContacts(pathFile);
+                BinarySaveLoad.LoadClients(data);
+                AddToListViewClients();
+            }
+            else
+            {
+                openFileDialog1.Filter = "All files (*.*)|*.*|DAT File (*.dat)|*.dat";
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string pathFile = openFileDialog1.FileName;
+                    LoadContacts(pathFile);
+                }
             }
         }
 
         private void listViewContacts_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            if (e.Column == 0 && sort == true)
+            if (login[0] == "Admin")
             {
-                contacts.Sort(new LoginComparer());
-                sort = false;
+                if (e.Column == 0 && sort == true)
+                {
+                    data.clientsFile.Sort(new LogClComparer());
+                    sort = false;
+                }
+                else if (e.Column == 0 && sort == false)
+                {
+                    data.clientsFile.Sort(new LogClComparer());
+                    data.clientsFile.Reverse();
+                    sort = true;
+                }
+                if (e.Column == 1 && sort == true)
+                {
+                    data.clientsFile.Sort(new CountClComparer());
+                    sort = false;
+                }
+                else if (e.Column == 1 && sort == false)
+                {
+                    data.clientsFile.Sort(new CountClComparer());
+                    data.clientsFile.Reverse();
+                    sort = true;
+                }
+                AddToListViewClients();
             }
-            else if (e.Column == 0 && sort == false)
+            else
             {
-                contacts.Sort(new LoginComparer());
-                contacts.Reverse();
-                sort = true;
+                if (e.Column == 0 && sort == true)
+                {
+                    contacts.Sort(new LoginComparer());
+                    sort = false;
+                }
+                else if (e.Column == 0 && sort == false)
+                {
+                    contacts.Sort(new LoginComparer());
+                    contacts.Reverse();
+                    sort = true;
+                }
+                if (e.Column == 1 && sort == true)
+                {
+                    contacts.Sort(new NameComparer());
+                    sort = false;
+                }
+                else if (e.Column == 1 && sort == false)
+                {
+                    contacts.Sort(new NameComparer());
+                    contacts.Reverse();
+                    sort = true;
+                }
+                AddToListViewContacts();
             }
-            if (e.Column == 1 && sort == true)
-            {
-                contacts.Sort(new NameComparer());
-                sort = false;
-            }
-            else if (e.Column == 1 && sort == false)
-            {
-                contacts.Sort(new NameComparer());
-                contacts.Reverse();
-                sort = true;
-            }
-            AddToListViewContacts();
         }
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Cont = new Contact();
-            ListViewItem item = listViewContacts.SelectedItems[0];
-            Cont.Login = item.SubItems[0].Text;
-            Cont.Name = item.SubItems[1].Text;
-            Cont.Tag = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].Tag;
-            Cont.color = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].color;
-            EditContact edit = new EditContact();
-            if (edit.ShowDialog(this) == DialogResult.OK)
+            if (login[0] == "Admin")
             {
-                int k = 0;
-                for (int i = 0; i < contacts.Count; i++)
+                client = new Client();
+                ListViewItem item = listViewClients.SelectedItems[0];
+                client.Name = item.SubItems[0].Text;
+                client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
+                client.Birthday = item.SubItems[2].Text; ;
+                client.Password = data.clientsFile[data.clientsFile.FindIndex((x) => x.Name == client.Name)].Password;
+                Registration edit = new Registration();
+                if (edit.ShowDialog(this) == DialogResult.OK)
                 {
-                    if (contacts[i].Login == Cont.Login)
-                    {
-                        k = i;
-                        break;
-                    }
+                    int k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
+
+                    data.clientsFile.RemoveAt(k);
+                    data.clientsFile.Add(edit.client);
+                    AddToListViewClients();
+                    MessageBox.Show("Client Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                contacts.RemoveAt(k);
-                contacts.Add(edit.contact);
-                AddToListViewContacts();
-                MessageBox.Show("Contact Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                Cont = new Contact();
+                ListViewItem it = listViewContacts.SelectedItems[0];
+                Cont.Login = it.SubItems[0].Text;
+                Cont.Name = it.SubItems[1].Text;
+                Cont.Tag = it.SubItems[2].Text;
+                Cont.color = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].color;
+                EditContact ed = new EditContact();
+                if (ed.ShowDialog(this) == DialogResult.OK)
+                {
+                    int k = contacts.FindIndex((x) => x.Login == Cont.Login);
+
+                    contacts.RemoveAt(k);
+                    contacts.Add(ed.contact);
+                    AddToListViewContacts();
+                    MessageBox.Show("Contact Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
 
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Cont = new Contact();
-            ListViewItem item = listViewContacts.SelectedItems[0];
-            Cont.Login = item.SubItems[0].Text;
-            int k = 0;
-            for (int i = 0; i < contacts.Count; i++)
+            if (login[0] == "Admin")
             {
-                if (contacts[i].Login == Cont.Login)
-                {
-                    k = i;
-                    break;
-                }
+                client = new Client();
+                ListViewItem it = listViewClients.SelectedItems[0];
+                client.Name = it.SubItems[0].Text;
+                int k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
+                data.clientsFile.RemoveAt(k);
+                AddToListViewClients();
+                MessageBox.Show("Client Deleted!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            contacts.RemoveAt(k);
-            AddToListViewContacts();
-            MessageBox.Show("Contact Deleted!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            else
+            {
+                Cont = new Contact();
+                ListViewItem item = listViewContacts.SelectedItems[0];
+                Cont.Login = item.SubItems[0].Text;
+
+                int k = contacts.FindIndex((x) => x.Login == Cont.Login);
+
+                contacts.RemoveAt(k);
+                AddToListViewContacts();
+                MessageBox.Show("Contact Deleted!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Cont = new Contact();
-            Cont.Login = "";
-            Cont.Name = "";
-            Cont.Tag = "";
-            Cont.color = RandColor(); ;
-            EditContact edit = new EditContact();
-            if (edit.ShowDialog(this) == DialogResult.OK)
+            if (login[0] == "Admin")
             {
-                contacts.Add(edit.contact);
-                AddToListViewContacts();
-                MessageBox.Show("Contact Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Client client = new Client();
+                string[] cl = new string[5];
+                cl[0] = "";
+                cl[1] = "";
+                cl[2] = "";
+                cl[3] = "";
+                cl[4] = "Add";
+                Registration ed = new Registration();
+                ed.login = cl;
+                if (ed.ShowDialog(this) == DialogResult.OK)
+                {
+                    cl = ed.login;
+                    client.Name = cl[0];
+                    client.Password = cl[2];
+                    client.CountBadWord = 0;
+                    client.Birthday = cl[3];
+
+                    data.clientsFile.Add(ed.client);
+                    AddToListViewClients();
+                    MessageBox.Show("Client Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
+            else
+            {
+                Cont = new Contact();
+                Cont.Login = "";
+                Cont.Name = "";
+                Cont.Tag = "";
+                Cont.color = RandColor();
+                EditContact edit = new EditContact();
+                if (edit.ShowDialog(this) == DialogResult.OK)
+                {
+                    contacts.Add(edit.contact);
+                    AddToListViewContacts();
+                    MessageBox.Show("Contact Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+
         }
 
         private void checkBoxGroups_CheckedChanged(object sender, EventArgs e)
@@ -535,13 +668,42 @@ namespace ClientChat
             }
         }
 
+        private void SendFile()
+        {
+            if (fileByte.Count > 0)
+                fileByte.Clear();
+            string lg = textBoxLoginFile.Text + " " + login[0] + " " + tagMessage;
+            byte[] lgB = Encoding.Default.GetBytes(lg);
+            fileByte.Add(lgB);
+            string name = openFileDialog1.SafeFileName;
+            byte[] lenB = Encoding.Default.GetBytes(name);
+            fileByte.Add(lenB);
+            byte[] fileB = File.ReadAllBytes(openFileDialog1.FileName);
+            fileByte.Add(fileB);
+            Transfer.SendTCP(socket, new DataFile() { FileByte = fileByte });
+            MessageBox.Show($"File sent to {textBoxLoginFile.Text}!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private void buttonSendFile_Click(object sender, EventArgs e)
         {
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             openFileDialog1.Filter = "All files (*.*)|*.*|Text File (*.txt)|*.txt";
+            if (checkBoxAll.Checked)
+                tagMessage = "other";
+            else
+                tagMessage = "private";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                if (!regLog.IsMatch(textBoxLoginFile.Text))
+                if (checkBoxAll.Checked)
+                {
+                    try
+                    {
+                        textBoxLoginFile.Text = "";
+                        SendFile();
+                    }
+                    catch { }
+                }
+                else if (!regLog.IsMatch(textBoxLoginFile.Text))
                 {
                     MessageBox.Show("Login entered incorrectly", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -551,21 +713,11 @@ namespace ClientChat
                 {
                     try
                     {
-                        if (fileByte.Count > 0)
-                            fileByte.Clear();
-                        string lg = textBoxLoginFile.Text + " " + login[0] + " " + "private";
-                        byte[] lgB = Encoding.Default.GetBytes(lg);
-                        fileByte.Add(lgB);
-                        string name = openFileDialog1.SafeFileName;
-                        byte[] lenB = Encoding.Default.GetBytes(name);
-                        fileByte.Add(lenB);
-                        byte[] fileB = File.ReadAllBytes(openFileDialog1.FileName);
-                        fileByte.Add(fileB);
-                        Transfer.SendTCP(socket, new DataFile() { FileByte = fileByte });
-                        MessageBox.Show($"File sent to {textBoxLoginFile.Text}!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SendFile();
                     }
                     catch { }
                 }
+
             }
             textBoxLoginFile.Clear();
         }
@@ -598,6 +750,19 @@ namespace ClientChat
             textBoxFileName.Clear();
             buttonLoadFile.Enabled = false;
         }
+
+        private void checkBoxAll_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxAll.Checked)
+            {
+                textBoxLoginFile.Enabled = false;
+                textBoxLoginFile.Clear();
+            }
+            else
+            {
+                textBoxLoginFile.Enabled = true;
+            }
+        }
     }
 
     [Serializable]
@@ -624,5 +789,22 @@ namespace ClientChat
             return string.Compare(x.Name, y.Name);
         }
     }
+
+    class LogClComparer : IComparer<Client>
+    {
+        public int Compare(Client x, Client y)
+        {
+            return string.Compare(x.Name, y.Name);
+        }
+    }
+
+    class CountClComparer : IComparer<Client>
+    {
+        public int Compare(Client x, Client y)
+        {
+            return string.Compare(x.CountBadWord.ToString(), y.CountBadWord.ToString());
+        }
+    }
+
 
 }

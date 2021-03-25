@@ -29,7 +29,7 @@ namespace ClientChat
         {
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");
-            login = new string[4];
+            login = new string[5];
             if (!regLog.IsMatch(textBoxLogin.Text))
             {
                 MessageBox.Show("Login entered incorrectly", "Warning",
@@ -47,10 +47,10 @@ namespace ClientChat
             }
             else
                 login[2] = Hash(textBoxPass.Text);
-            string[] answer = new string[4];
+            string[] answer = new string[5];
             Transfer.SendTCP(tcp, new DataMessage() { Array = login });
             answer = ((DataMessage)Transfer.ReceiveTCP(tcp)).Array; 
-            if (answer[3] == "No")
+            if (answer[4] == "No")
             {
                 MessageBox.Show("Login or password is not correct, or such a login is already in the chat", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);

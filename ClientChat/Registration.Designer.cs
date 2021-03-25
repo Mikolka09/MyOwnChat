@@ -37,6 +37,8 @@ namespace ClientChat
             this.textBoxLogin = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxRepeat = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.dateTimePickerBirthday = new System.Windows.Forms.DateTimePicker();
             this.SuspendLayout();
             // 
             // label2
@@ -63,7 +65,7 @@ namespace ClientChat
             // 
             this.buttonExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.buttonExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonExit.Location = new System.Drawing.Point(204, 238);
+            this.buttonExit.Location = new System.Drawing.Point(194, 302);
             this.buttonExit.Name = "buttonExit";
             this.buttonExit.Size = new System.Drawing.Size(86, 33);
             this.buttonExit.TabIndex = 4;
@@ -75,7 +77,7 @@ namespace ClientChat
             // 
             this.buttonOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonOK.Location = new System.Drawing.Point(12, 238);
+            this.buttonOK.Location = new System.Drawing.Point(12, 302);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(86, 33);
             this.buttonOK.TabIndex = 3;
@@ -122,11 +124,30 @@ namespace ClientChat
             this.textBoxRepeat.Size = new System.Drawing.Size(245, 34);
             this.textBoxRepeat.TabIndex = 2;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(97, 234);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(89, 18);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "BIRTHDAY";
+            // 
+            // dateTimePickerBirthday
+            // 
+            this.dateTimePickerBirthday.Location = new System.Drawing.Point(26, 255);
+            this.dateTimePickerBirthday.Name = "dateTimePickerBirthday";
+            this.dateTimePickerBirthday.Size = new System.Drawing.Size(245, 22);
+            this.dateTimePickerBirthday.TabIndex = 16;
+            // 
             // Registration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(302, 286);
+            this.ClientSize = new System.Drawing.Size(302, 347);
+            this.Controls.Add(this.dateTimePickerBirthday);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBoxRepeat);
             this.Controls.Add(this.label2);
@@ -137,6 +158,7 @@ namespace ClientChat
             this.Controls.Add(this.textBoxLogin);
             this.Name = "Registration";
             this.Text = "REGISTRATION";
+            this.Load += new System.EventHandler(this.Registration_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -152,5 +174,7 @@ namespace ClientChat
         private System.Windows.Forms.TextBox textBoxLogin;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxRepeat;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.DateTimePicker dateTimePickerBirthday;
     }
 }

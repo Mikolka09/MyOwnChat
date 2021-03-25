@@ -76,8 +76,11 @@ namespace MyOwnChat
                 {
                     await Task.Delay(500, token);
                     string[] message = new string[4];
-                    message = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                    ServerMediator(socket, message);
+                    Data data = Transfer.ReceiveTCP(socket);
+                    if (data is DataFile)
+                        ServerCheckSendFile(((DataFile)data).FileByte);
+                    else
+                        ServerMediator(socket, ((DataMessage)data).Array);
                 }
             }
             catch (OperationCanceledException) { }
@@ -131,7 +134,7 @@ namespace MyOwnChat
                         }
                         string mess = $"[Groups: {clientSend.Name}]: " + message[0];
                         message[0] = mess;
-                            SendToGroups(clientSend, clientsReceive, message);
+                        SendToGroups(clientSend, clientsReceive, message);
                         break;
                     }
                 case "exit":
@@ -148,6 +151,36 @@ namespace MyOwnChat
                     break;
             }
 
+        }
+
+        private static void ServerCheckSendFile(List<byte[]> fileByte)
+        {
+            string name = Encoding.Default.GetString(fileByte[0]);
+            string[] mess = new string[3];
+            mess = name.Split();
+            Client clientSend = new Client();
+            clientSend = clients[clients.FindIndex((x) => x.Name == mess[1])];
+            Client clientReceive = new Client();
+            clientReceive = clients[clients.FindIndex((x) => x.Name == mess[0])];
+            string mes = $"[SendFile: {clientSend.Name}]: File sent!";
+            string[] sub = new string[4];
+            sub[0] = mes;
+            sub[1] = mess[2];
+            sub[2] = "";
+            sub[3] = "";
+            SendToFile(clientSend, clientReceive, fileByte, sub);
+        }
+
+        private static void SendToFile(Client clientSend, Client clientReceive, List<byte[]> fileByte, string[] sub)
+        {
+            lock (lck)
+            {
+                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = sub }));
+                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataMessage() { Array = sub }));
+                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataFile() { FileByte = fileByte }));
+
+                Console.WriteLine($"File has been sent: {clientSend.Name} from: {clientReceive.Name}");
+            }
         }
 
         private static void SendToPrivateMessage(Client clientSend, Client clientReceive, string[] message)

@@ -20,6 +20,12 @@ namespace ProtocolsMessages
         public string[] Array { get; set; }
     }
 
+    [Serializable]
+    public class DataFile : Data
+    {
+        public List<byte[]> FileByte { get; set; }
+    }
+
     public class Transfer
     {
         private static BinaryFormatter formatter = new BinaryFormatter();

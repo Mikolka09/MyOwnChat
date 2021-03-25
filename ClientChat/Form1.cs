@@ -37,8 +37,10 @@ namespace ClientChat
         private Random rand;
         public Contact Cont;
         private bool sort = true;
-        private static int countMess = 0;
-        private static string logs;
+        private int countMess = 0;
+        private string logs;
+        private string exp;
+        private List<byte[]> fileByte;
 
         public Form1()
         {
@@ -59,6 +61,7 @@ namespace ClientChat
             catch (Exception)
             {
                 MessageBox.Show("SERVER IS NOT CONNECTOR", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Close();
             }
         }
 
@@ -124,20 +127,30 @@ namespace ClientChat
                     {
                         int count = listViewMessages.Items.Count;
                         string[] mess = new string[4];
-                        mess = ((DataMessage)Transfer.ReceiveTCP(socket)).Array;
-                        CheckReceives(mess);
-                        string buff = mess[0];
-                        Color color = RandColor();
-                        color = ContactColor(mess[2], color);
-                        string dateTime = DateTime.Now.ToLongTimeString();
-
-                        if (listViewMessages.InvokeRequired)
+                        Data data = Transfer.ReceiveTCP(socket);
+                        if (data is DataFile)
                         {
-                            listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(" ")));
-                            listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(dateTime)));
-                            listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(buff)));
-                            listViewMessages.Invoke(new Action(() => listViewMessages.Items[count + 2].ForeColor = color));
+                            fileByte = ((DataFile)data).FileByte;
+                            LoadFileByte(fileByte);
                         }
+                        else
+                        {
+                            mess = ((DataMessage)data).Array;
+                            CheckReceives(mess);
+                            string buff = mess[0];
+                            Color color = RandColor();
+                            color = ContactColor(mess[2], color);
+                            string dateTime = DateTime.Now.ToLongTimeString();
+
+                            if (listViewMessages.InvokeRequired)
+                            {
+                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(" ")));
+                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(dateTime)));
+                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(buff)));
+                                listViewMessages.Invoke(new Action(() => listViewMessages.Items[count + 2].ForeColor = color));
+                            }
+                        }
+
                     }
                 });
             }
@@ -212,6 +225,7 @@ namespace ClientChat
                     message = new string[4];
                     contacts = new List<Contact>();
                     tempContacts = new List<Contact>();
+                    fileByte = new List<byte[]>();
                     message[1] = "other";
                     message[2] = login[0];
                     message[3] = "";
@@ -221,6 +235,8 @@ namespace ClientChat
                     buttonSend.Enabled = true;
                     textBoxMessage.Enabled = true;
                     buttonSaveContacts.Enabled = false;
+                    buttonLoadFile.Enabled = false;
+                    textBoxFileName.Enabled = false;
                     this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
                     HideHorizontalScrollBar();
                     if (contacts.Count != 0)
@@ -265,12 +281,22 @@ namespace ClientChat
 
         private void buttonInquiry_Click(object sender, EventArgs e)
         {
-            message[1] = "private";
-            message[2] = login[0];
-            message[3] = textBoxName.Text;
-            textBoxName.Enabled = false;
-            buttonInquiry.Enabled = false;
-            buttonCancelPrivateChat.Enabled = true;
+            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
+            if (!regLog.IsMatch(textBoxName.Text))
+            {
+                MessageBox.Show("Login entered incorrectly", "Warning",
+                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else
+            {
+                message[1] = "private";
+                message[2] = login[0];
+                message[3] = textBoxName.Text;
+                textBoxName.Enabled = false;
+                buttonInquiry.Enabled = false;
+                buttonCancelPrivateChat.Enabled = true;
+            }
         }
 
         private void buttonCancelPrivateChat_Click(object sender, EventArgs e)
@@ -323,7 +349,10 @@ namespace ClientChat
             Cont = new Contact();
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
             string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
-            Cont.Login = str[0];
+            if (str.Length == 2)
+                Cont.Login = str[0].Split()[1];
+            else
+                Cont.Login = str[0];
             Cont.color = tempContacts[tempContacts.FindIndex((x) => x.Login == Cont.Login)].color;
             EditContact editContact = new EditContact();
             if (editContact.ShowDialog(this) == DialogResult.OK)
@@ -504,6 +533,70 @@ namespace ClientChat
                 message[3] = "";
                 countMess = 0;
             }
+        }
+
+        private void buttonSendFile_Click(object sender, EventArgs e)
+        {
+            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
+            openFileDialog1.Filter = "All files (*.*)|*.*|Text File (*.txt)|*.txt";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (!regLog.IsMatch(textBoxLoginFile.Text))
+                {
+                    MessageBox.Show("Login entered incorrectly", "Warning",
+                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                else
+                {
+                    try
+                    {
+                        if (fileByte.Count > 0)
+                            fileByte.Clear();
+                        string lg = textBoxLoginFile.Text + " " + login[0] + " " + "private";
+                        byte[] lgB = Encoding.Default.GetBytes(lg);
+                        fileByte.Add(lgB);
+                        string name = openFileDialog1.SafeFileName;
+                        byte[] lenB = Encoding.Default.GetBytes(name);
+                        fileByte.Add(lenB);
+                        byte[] fileB = File.ReadAllBytes(openFileDialog1.FileName);
+                        fileByte.Add(fileB);
+                        Transfer.SendTCP(socket, new DataFile() { FileByte = fileByte });
+                        MessageBox.Show($"File sent to {textBoxLoginFile.Text}!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch { }
+                }
+            }
+            textBoxLoginFile.Clear();
+        }
+
+        private void LoadFileByte(List<byte[]> file)
+        {
+            string name = Encoding.Default.GetString(file[1]);
+            if (buttonLoadFile.InvokeRequired)
+                buttonLoadFile.Invoke(new Action(() => buttonLoadFile.Enabled = true));
+            if (textBoxFileName.InvokeRequired)
+                textBoxFileName.Invoke(new Action(() => textBoxFileName.Text = name));
+            exp = "." + name.Split('.')[1];
+        }
+
+        private void buttonLoadFile_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.DefaultExt = exp;
+            saveFileDialog1.Filter = "All files (*.*)|*.*|ext File (*.txt)|*.txt";
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string pathFile = saveFileDialog1.FileName;
+                    File.WriteAllBytes(pathFile, fileByte[2]);
+                    MessageBox.Show("File Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch { }
+
+            }
+            textBoxFileName.Clear();
+            buttonLoadFile.Enabled = false;
         }
     }
 

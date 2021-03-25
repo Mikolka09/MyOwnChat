@@ -46,25 +46,33 @@ namespace ClientChat
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxName = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxGroups = new System.Windows.Forms.CheckBox();
             this.buttonLoadContacts = new System.Windows.Forms.Button();
             this.buttonSaveContacts = new System.Windows.Forms.Button();
             this.listViewContacts = new System.Windows.Forms.ListView();
             this.columnLogin = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.columnTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.checkBoxGroups = new System.Windows.Forms.CheckBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.buttonSendFile = new System.Windows.Forms.Button();
+            this.buttonLoadFile = new System.Windows.Forms.Button();
+            this.textBoxLoginFile = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBoxFileName = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonExit
             // 
             this.buttonExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.buttonExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonExit.Location = new System.Drawing.Point(697, 453);
+            this.buttonExit.Location = new System.Drawing.Point(696, 468);
             this.buttonExit.Name = "buttonExit";
             this.buttonExit.Size = new System.Drawing.Size(91, 36);
             this.buttonExit.TabIndex = 3;
@@ -118,7 +126,7 @@ namespace ClientChat
             this.listViewMessages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listViewMessages.Location = new System.Drawing.Point(12, 123);
             this.listViewMessages.Name = "listViewMessages";
-            this.listViewMessages.Size = new System.Drawing.Size(524, 324);
+            this.listViewMessages.Size = new System.Drawing.Size(524, 311);
             this.listViewMessages.TabIndex = 9;
             this.listViewMessages.UseCompatibleStateImageBehavior = false;
             this.listViewMessages.View = System.Windows.Forms.View.List;
@@ -218,16 +226,28 @@ namespace ClientChat
             this.groupBox2.Controls.Add(this.listViewContacts);
             this.groupBox2.Location = new System.Drawing.Point(542, 105);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(246, 342);
+            this.groupBox2.Size = new System.Drawing.Size(246, 357);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "MY CONTACTS";
+            // 
+            // checkBoxGroups
+            // 
+            this.checkBoxGroups.AutoSize = true;
+            this.checkBoxGroups.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.checkBoxGroups.Location = new System.Drawing.Point(154, 326);
+            this.checkBoxGroups.Name = "checkBoxGroups";
+            this.checkBoxGroups.Size = new System.Drawing.Size(83, 21);
+            this.checkBoxGroups.TabIndex = 15;
+            this.checkBoxGroups.Text = "Groups";
+            this.checkBoxGroups.UseVisualStyleBackColor = true;
+            this.checkBoxGroups.CheckedChanged += new System.EventHandler(this.checkBoxGroups_CheckedChanged);
             // 
             // buttonLoadContacts
             // 
             this.buttonLoadContacts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.buttonLoadContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonLoadContacts.Location = new System.Drawing.Point(73, 297);
+            this.buttonLoadContacts.Location = new System.Drawing.Point(73, 319);
             this.buttonLoadContacts.Name = "buttonLoadContacts";
             this.buttonLoadContacts.Size = new System.Drawing.Size(65, 32);
             this.buttonLoadContacts.TabIndex = 14;
@@ -239,7 +259,7 @@ namespace ClientChat
             // 
             this.buttonSaveContacts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonSaveContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonSaveContacts.Location = new System.Drawing.Point(6, 297);
+            this.buttonSaveContacts.Location = new System.Drawing.Point(6, 319);
             this.buttonSaveContacts.Name = "buttonSaveContacts";
             this.buttonSaveContacts.Size = new System.Drawing.Size(61, 32);
             this.buttonSaveContacts.TabIndex = 13;
@@ -259,7 +279,7 @@ namespace ClientChat
             this.listViewContacts.FullRowSelect = true;
             this.listViewContacts.Location = new System.Drawing.Point(6, 22);
             this.listViewContacts.Name = "listViewContacts";
-            this.listViewContacts.Size = new System.Drawing.Size(234, 269);
+            this.listViewContacts.Size = new System.Drawing.Size(234, 291);
             this.listViewContacts.TabIndex = 0;
             this.listViewContacts.UseCompatibleStateImageBehavior = false;
             this.listViewContacts.View = System.Windows.Forms.View.Details;
@@ -275,32 +295,98 @@ namespace ClientChat
             this.columnName.Text = "NAME";
             this.columnName.Width = 63;
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            // 
             // columnTag
             // 
             this.columnTag.Text = "TAG";
             this.columnTag.Width = 71;
             // 
-            // checkBoxGroups
+            // openFileDialog1
             // 
-            this.checkBoxGroups.AutoSize = true;
-            this.checkBoxGroups.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.checkBoxGroups.Location = new System.Drawing.Point(154, 304);
-            this.checkBoxGroups.Name = "checkBoxGroups";
-            this.checkBoxGroups.Size = new System.Drawing.Size(83, 21);
-            this.checkBoxGroups.TabIndex = 15;
-            this.checkBoxGroups.Text = "Groups";
-            this.checkBoxGroups.UseVisualStyleBackColor = true;
-            this.checkBoxGroups.CheckedChanged += new System.EventHandler(this.checkBoxGroups_CheckedChanged);
+            this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.textBoxFileName);
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Controls.Add(this.textBoxLoginFile);
+            this.groupBox3.Controls.Add(this.buttonLoadFile);
+            this.groupBox3.Controls.Add(this.buttonSendFile);
+            this.groupBox3.Location = new System.Drawing.Point(13, 440);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(523, 64);
+            this.groupBox3.TabIndex = 12;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "SEND AND LOAD FILE";
+            // 
+            // buttonSendFile
+            // 
+            this.buttonSendFile.BackColor = System.Drawing.Color.PaleGreen;
+            this.buttonSendFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSendFile.Location = new System.Drawing.Point(6, 26);
+            this.buttonSendFile.Name = "buttonSendFile";
+            this.buttonSendFile.Size = new System.Drawing.Size(94, 32);
+            this.buttonSendFile.TabIndex = 16;
+            this.buttonSendFile.Text = "SendFile";
+            this.buttonSendFile.UseVisualStyleBackColor = false;
+            this.buttonSendFile.Click += new System.EventHandler(this.buttonSendFile_Click);
+            // 
+            // buttonLoadFile
+            // 
+            this.buttonLoadFile.BackColor = System.Drawing.Color.HotPink;
+            this.buttonLoadFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonLoadFile.Location = new System.Drawing.Point(414, 26);
+            this.buttonLoadFile.Name = "buttonLoadFile";
+            this.buttonLoadFile.Size = new System.Drawing.Size(103, 32);
+            this.buttonLoadFile.TabIndex = 17;
+            this.buttonLoadFile.Text = "LoadFile";
+            this.buttonLoadFile.UseVisualStyleBackColor = false;
+            this.buttonLoadFile.Click += new System.EventHandler(this.buttonLoadFile_Click);
+            // 
+            // textBoxLoginFile
+            // 
+            this.textBoxLoginFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxLoginFile.Location = new System.Drawing.Point(169, 26);
+            this.textBoxLoginFile.Multiline = true;
+            this.textBoxLoginFile.Name = "textBoxLoginFile";
+            this.textBoxLoginFile.Size = new System.Drawing.Size(83, 32);
+            this.textBoxLoginFile.TabIndex = 13;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(110, 34);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(53, 17);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "Login:";
+            // 
+            // textBoxFileName
+            // 
+            this.textBoxFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxFileName.Location = new System.Drawing.Point(276, 26);
+            this.textBoxFileName.Multiline = true;
+            this.textBoxFileName.Name = "textBoxFileName";
+            this.textBoxFileName.Size = new System.Drawing.Size(132, 32);
+            this.textBoxFileName.TabIndex = 18;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label5.Location = new System.Drawing.Point(299, 6);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(80, 17);
+            this.label5.TabIndex = 19;
+            this.label5.Text = "File Name";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 501);
+            this.ClientSize = new System.Drawing.Size(800, 516);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.listViewMessages);
@@ -317,6 +403,8 @@ namespace ClientChat
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -348,6 +436,13 @@ namespace ClientChat
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnTag;
         private System.Windows.Forms.CheckBox checkBoxGroups;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBoxFileName;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBoxLoginFile;
+        private System.Windows.Forms.Button buttonLoadFile;
+        private System.Windows.Forms.Button buttonSendFile;
     }
 }
 

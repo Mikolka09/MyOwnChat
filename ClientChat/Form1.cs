@@ -19,11 +19,6 @@ namespace ClientChat
 {
     public partial class Form1 : Form
     {
-        [System.Runtime.InteropServices.DllImport("user32", CallingConvention = System.Runtime.InteropServices.CallingConvention.Winapi)]
-        [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-
-        private static extern bool ShowScrollBar(IntPtr hwnd, int wBar,
-            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)] bool bShow);
 
         private IPAddress iP;
         private IPEndPoint endPoint;
@@ -31,7 +26,7 @@ namespace ClientChat
         private string address = "127.0.0.1";
         private int port = 1250;
         private string[] login;
-        private string[] message;
+        public string[] message;
         private List<Contact> contacts;
         private List<Contact> tempContacts;
         private Random rand;
@@ -67,11 +62,6 @@ namespace ClientChat
                 MessageBox.Show("SERVER IS NOT CONNECTOR", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Close();
             }
-        }
-
-        private void HideHorizontalScrollBar()
-        {
-            ShowScrollBar(listViewMessages.Handle, 0, false);
         }
 
         private void StartChat()
@@ -145,13 +135,16 @@ namespace ClientChat
                             Color color = RandColor();
                             color = ContactColor(mess[2], color);
                             string dateTime = DateTime.Now.ToLongTimeString();
-
-                            if (listViewMessages.InvokeRequired)
+                            string print = "";
+                            for (int i = 0; i < 3; i++)
                             {
-                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(" ")));
-                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(dateTime)));
-                                listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(buff)));
-                                listViewMessages.Invoke(new Action(() => listViewMessages.Items[count + 2].ForeColor = color));
+                                if (i == 0) print = "";
+                                if (i == 1) print = dateTime;
+                                if (i == 2) print = buff;
+                                ListViewItem it = new ListViewItem(print);
+                                if (i == 2) it.ForeColor = color;
+                                if (listViewMessages.InvokeRequired)
+                                    listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(it)));
                             }
                         }
 
@@ -252,15 +245,13 @@ namespace ClientChat
                         message[2] = login[0];
                         message[3] = "";
                         listViewMessages.Items.Clear();
-                        listViewMessages.Items.Add("SERVER CONNEСTOR: " + DateTime.Now.ToString() + "          ");
-                        listViewMessages.Items[0].ForeColor = Color.Red;
+                        listViewMessages.Columns[0].Width = listViewMessages.Width - 5;
+                        listViewMessages.Columns[0].Text = "SERVER CONNEСTOR: " + DateTime.Now.ToString();
                         buttonSend.Enabled = true;
                         textBoxMessage.Enabled = true;
                         buttonSaveContacts.Enabled = false;
-                        buttonLoadFile.Enabled = false;
                         textBoxFileName.Enabled = false;
                         this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
-                        HideHorizontalScrollBar();
                         StartChat();
                     }
                 }
@@ -297,38 +288,6 @@ namespace ClientChat
             }
             else
                 Close();
-        }
-
-
-        private void buttonInquiry_Click(object sender, EventArgs e)
-        {
-            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
-            if (!regLog.IsMatch(textBoxName.Text))
-            {
-                MessageBox.Show("Login entered incorrectly", "Warning",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            else
-            {
-                message[1] = "private";
-                message[2] = login[0];
-                message[3] = textBoxName.Text;
-                textBoxName.Enabled = false;
-                buttonInquiry.Enabled = false;
-                buttonCancelPrivateChat.Enabled = true;
-            }
-        }
-
-        private void buttonCancelPrivateChat_Click(object sender, EventArgs e)
-        {
-            message[1] = "other";
-            message[2] = login[0];
-            message[3] = "";
-            textBoxName.Clear();
-            textBoxName.Enabled = true;
-            buttonInquiry.Enabled = true;
-            buttonCancelPrivateChat.Enabled = false;
         }
 
         public Color RandColor()
@@ -530,22 +489,37 @@ namespace ClientChat
         {
             if (login[0] == "Admin")
             {
-                client = new Client();
-                ListViewItem item = listViewClients.SelectedItems[0];
-                client.Name = item.SubItems[0].Text;
-                client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
-                client.Birthday = item.SubItems[2].Text; ;
-                client.Password = data.clientsFile[data.clientsFile.FindIndex((x) => x.Name == client.Name)].Password;
-                Registration edit = new Registration();
-                if (edit.ShowDialog(this) == DialogResult.OK)
+                bool res = true;
+                int k = 0;
+                AddClient edit = new AddClient(); ;
+                while (res)
                 {
-                    int k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
-
-                    data.clientsFile.RemoveAt(k);
-                    data.clientsFile.Add(edit.client);
-                    AddToListViewClients();
-                    MessageBox.Show("Client Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    client = new Client();
+                    ListViewItem item = listViewClients.SelectedItems[0];
+                    client.Name = item.SubItems[0].Text;
+                    client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
+                    client.Birthday = item.SubItems[2].Text; ;
+                    client.Password = data.clientsFile[data.clientsFile.FindIndex((x) => x.Name == client.Name)].Password;
+                    if (edit.ShowDialog(this) == DialogResult.OK)
+                    {
+                        client = edit.client;
+                        if (!data.clientsFile.Exists((x) => x.Name == client.Name))
+                        {
+                            k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
+                            res = false;
+                        }
+                        else
+                        {
+                            MessageBox.Show("There is already a user with this login, please try again!", "Warning", 
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            res = true;
+                        }
+                    }
                 }
+                data.clientsFile.RemoveAt(k);
+                data.clientsFile.Add(edit.client);
+                AddToListViewClients();
+                MessageBox.Show("Client Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
@@ -599,24 +573,16 @@ namespace ClientChat
         {
             if (login[0] == "Admin")
             {
-                Client client = new Client();
-                string[] cl = new string[5];
-                cl[0] = "";
-                cl[1] = "";
-                cl[2] = "";
-                cl[3] = "";
-                cl[4] = "Add";
-                Registration ed = new Registration();
-                ed.login = cl;
-                if (ed.ShowDialog(this) == DialogResult.OK)
+                client = new Client();
+                AddClient ad = new AddClient();
+                if (ad.ShowDialog(this) == DialogResult.OK)
                 {
-                    cl = ed.login;
-                    client.Name = cl[0];
-                    client.Password = cl[2];
+                    login = ad.login;
+                    client.Name = login[0];
+                    client.Password = login[2];
                     client.CountBadWord = 0;
-                    client.Birthday = cl[3];
-
-                    data.clientsFile.Add(ed.client);
+                    client.Birthday = login[3];
+                    data.clientsFile.Add(client);
                     AddToListViewClients();
                     MessageBox.Show("Client Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -668,11 +634,11 @@ namespace ClientChat
             }
         }
 
-        private void SendFile()
+        private void SendFile(string log)
         {
             if (fileByte.Count > 0)
                 fileByte.Clear();
-            string lg = textBoxLoginFile.Text + " " + login[0] + " " + tagMessage;
+            string lg = log + " " + login[0] + " " + tagMessage;
             byte[] lgB = Encoding.Default.GetBytes(lg);
             fileByte.Add(lgB);
             string name = openFileDialog1.SafeFileName;
@@ -681,87 +647,87 @@ namespace ClientChat
             byte[] fileB = File.ReadAllBytes(openFileDialog1.FileName);
             fileByte.Add(fileB);
             Transfer.SendTCP(socket, new DataFile() { FileByte = fileByte });
-            MessageBox.Show($"File sent to {textBoxLoginFile.Text}!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"File sent from \"{log}\"!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void buttonSendFile_Click(object sender, EventArgs e)
+        private void buttonSendFileAll_Click(object sender, EventArgs e)
         {
-            Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             openFileDialog1.Filter = "All files (*.*)|*.*|Text File (*.txt)|*.txt";
-            if (checkBoxAll.Checked)
-                tagMessage = "other";
-            else
-                tagMessage = "private";
+            tagMessage = "other";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                if (checkBoxAll.Checked)
-                {
-                    try
-                    {
-                        textBoxLoginFile.Text = "";
-                        SendFile();
-                    }
-                    catch { }
-                }
-                else if (!regLog.IsMatch(textBoxLoginFile.Text))
-                {
-                    MessageBox.Show("Login entered incorrectly", "Warning",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                else
-                {
-                    try
-                    {
-                        SendFile();
-                    }
-                    catch { }
-                }
-
-            }
-            textBoxLoginFile.Clear();
+                SendFile("");
         }
 
         private void LoadFileByte(List<byte[]> file)
         {
             string name = Encoding.Default.GetString(file[1]);
-            if (buttonLoadFile.InvokeRequired)
-                buttonLoadFile.Invoke(new Action(() => buttonLoadFile.Enabled = true));
-            if (textBoxFileName.InvokeRequired)
-                textBoxFileName.Invoke(new Action(() => textBoxFileName.Text = name));
-            exp = "." + name.Split('.')[1];
+            if (MessageBox.Show($"You received a file \"{name}\" from \"{message[2]}\", do you want to keep it?", "Messsage",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+            {
+                if (textBoxFileName.InvokeRequired)
+                    textBoxFileName.Invoke(new Action(() => textBoxFileName.Text = name));
+                exp = "." + name.Split('.')[1];
+                Thread thread = new Thread(SaveFile);
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
+            }
         }
 
-        private void buttonLoadFile_Click(object sender, EventArgs e)
+
+        private void SaveFile()
         {
-            saveFileDialog1.DefaultExt = exp;
-            saveFileDialog1.Filter = "All files (*.*)|*.*|ext File (*.txt)|*.txt";
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            try
             {
-                try
+                saveFileDialog1.DefaultExt = exp;
+                saveFileDialog1.Filter = "All files (*.*)|*.*|ext File (*.txt)|*.txt";
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     string pathFile = saveFileDialog1.FileName;
                     File.WriteAllBytes(pathFile, fileByte[2]);
                     MessageBox.Show("File Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                catch { }
-
+                textBoxFileName.Clear();
             }
-            textBoxFileName.Clear();
-            buttonLoadFile.Enabled = false;
+            catch { throw; }
+
         }
 
-        private void checkBoxAll_CheckedChanged(object sender, EventArgs e)
+        private string ReceiveLogin()
         {
-            if (checkBoxAll.Checked)
-            {
-                textBoxLoginFile.Enabled = false;
-                textBoxLoginFile.Clear();
-            }
+            string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
+            string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+            if (str.Length > 2)
+                return str[0].Split()[1];
             else
+                return str[0];
+        }
+
+
+        private void sendPrivateMessageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            message[3] = ReceiveLogin();
+            PrivateMessage prive = new PrivateMessage();
+            if (prive.ShowDialog(this) == DialogResult.OK)
             {
-                textBoxLoginFile.Enabled = true;
+                message[0] = prive.message;
+                message[1] = "private";
+                message[2] = login[0];
+
+                Transfer.SendTCP(socket, new DataMessage() { Array = message });
             }
+        }
+
+        private void sendFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "All files (*.*)|*.*|Text File (*.txt)|*.txt";
+            tagMessage = "private";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                SendFile(ReceiveLogin());
+        }
+
+        private void textBoxMessage_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

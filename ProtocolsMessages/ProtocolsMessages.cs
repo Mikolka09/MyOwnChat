@@ -52,10 +52,11 @@ namespace ProtocolsMessages
         public static Data ReceiveTCP(TcpClient client)
         {
             try
-            {
-                return (Data)formatter.Deserialize(client.GetStream());
+            { 
+            return (Data)formatter.Deserialize(client.GetStream());
             }
-            catch { throw; }
+            catch(IOException) { throw; }
+
 
         }
     }
@@ -81,7 +82,7 @@ namespace ProtocolsMessages
             }
         }
     }
-    
+
     [Serializable]
     public class Client
     {

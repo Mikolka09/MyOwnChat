@@ -168,6 +168,8 @@ namespace MyOwnChat
                         client = clients[clients.FindIndex((x) => x.Name == message[2])];
                         Console.WriteLine($"Client passed out with Name: {client.Name} and IP: {client.EndPointClient.Address}");
                         messEveryone[0] = $"{client.Name} left to chat";
+                        dataClient.clientsFile[dataClient.clientsFile.FindIndex((x) => x.Name == message[2])] =
+                             clients[clients.FindIndex((x) => x.Name == message[2])];
                         SendToEveryone(client, messEveryone);
                         clients.RemoveAt(clients.FindIndex((x) => x.Name == message[2]));
                         BinarySaveLoad.SaveClients(dataClient);

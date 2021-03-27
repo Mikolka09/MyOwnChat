@@ -12,7 +12,7 @@ using System.Net.Sockets;
 using ProtocolsMessages;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-
+using SkinSoft.VisualStyler;
 namespace ClientChat
 {
     public partial class Input : Form
@@ -23,6 +23,7 @@ namespace ClientChat
         public Input()
         {
             InitializeComponent();
+           
         }
             
         private void buttonOK_Click(object sender, EventArgs e)

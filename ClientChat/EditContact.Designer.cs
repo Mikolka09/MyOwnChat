@@ -99,7 +99,7 @@ namespace ClientChat
             // 
             // buttonOk
             // 
-            this.buttonOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.buttonOk.BackColor = System.Drawing.SystemColors.Control;
             this.buttonOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonOk.Location = new System.Drawing.Point(24, 252);
             this.buttonOk.Name = "buttonOk";
@@ -111,7 +111,7 @@ namespace ClientChat
             // 
             // buttonCancel
             // 
-            this.buttonCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.buttonCancel.BackColor = System.Drawing.SystemColors.Control;
             this.buttonCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonCancel.Location = new System.Drawing.Point(192, 252);
             this.buttonCancel.Name = "buttonCancel";

@@ -59,7 +59,7 @@ namespace ClientChat
             // 
             // buttonOK
             // 
-            this.buttonOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.buttonOK.BackColor = System.Drawing.SystemColors.Control;
             this.buttonOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonOK.Location = new System.Drawing.Point(12, 207);
             this.buttonOK.Name = "buttonOK";
@@ -71,7 +71,7 @@ namespace ClientChat
             // 
             // buttonExit
             // 
-            this.buttonExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.buttonExit.BackColor = System.Drawing.SystemColors.Control;
             this.buttonExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonExit.Location = new System.Drawing.Point(220, 207);
             this.buttonExit.Name = "buttonExit";
@@ -103,7 +103,7 @@ namespace ClientChat
             // 
             // buttonReg
             // 
-            this.buttonReg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.buttonReg.BackColor = System.Drawing.SystemColors.Control;
             this.buttonReg.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonReg.Location = new System.Drawing.Point(84, 162);
             this.buttonReg.Name = "buttonReg";

@@ -39,7 +39,7 @@ namespace ClientChat
 
             if (client.Name == null)
             {
-                tcp = (Owner as Input).tcp;
+                tcp = (Owner as Form1).socket;
                 login = new string[5];
                 bool res = true;
                 while (res)
@@ -52,7 +52,7 @@ namespace ClientChat
                     }
                     else
                         login[0] = textBoxLogin.Text;
-                    login[1] = "avtorization";
+                    login[1] = "create";
                     if (!regPass.IsMatch(textBoxPass.Text))
                     {
                         MessageBox.Show("Password entered incorrectly", "Warning",
@@ -87,11 +87,11 @@ namespace ClientChat
                     }
                     else
                         res = false;
-                } 
+                }
             }
             else
             {
-                
+
                 if (!regLog.IsMatch(textBoxLogin.Text))
                 {
                     MessageBox.Show("Login entered incorrectly", "Warning",
@@ -100,10 +100,30 @@ namespace ClientChat
                 }
                 else
                     client.Name = textBoxLogin.Text;
+                if(client.Name == "Admin")
+                {
+                    if (!regPass.IsMatch(textBoxPass.Text))
+                    {
+                        MessageBox.Show("Password entered incorrectly", "Warning",
+                                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    else
+                    {
+                        while (textBoxPass.Text != textBoxRepeat.Text)
+                        {
+                            MessageBox.Show("Enter your password again", "Warning",
+                                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            textBoxPass.Clear();
+                            textBoxRepeat.Clear();
+                        }
+                        client.Password = Hash(textBoxPass.Text);
+                    }
+                }
                 client.Birthday = dateTimePickerBirthday.Value.ToShortDateString();
 
             }
-           
+
             DialogResult = DialogResult.OK;
         }
 
@@ -123,9 +143,18 @@ namespace ClientChat
             if (client.Name != null)
             {
                 textBoxLogin.Text = client.Name;
-                textBoxPass.Enabled = false;
-                textBoxPass.Enabled = false;
-                dateTimePickerBirthday.Value = Convert.ToDateTime(client.Birthday);
+                if(client.Name == "Admin")
+                {
+                    textBoxPass.Enabled = true;
+                    textBoxRepeat.Enabled = true;
+                }
+                else
+                {
+                    textBoxPass.Enabled = false;
+                    textBoxRepeat.Enabled = false;
+                } 
+                if (client.Birthday != "")
+                    dateTimePickerBirthday.Value = Convert.ToDateTime(client.Birthday);
             }
         }
     }

@@ -139,7 +139,7 @@ namespace ClientChat
             this.dateTimePickerBirthday.Location = new System.Drawing.Point(26, 255);
             this.dateTimePickerBirthday.Name = "dateTimePickerBirthday";
             this.dateTimePickerBirthday.Size = new System.Drawing.Size(245, 22);
-            this.dateTimePickerBirthday.TabIndex = 16;
+            this.dateTimePickerBirthday.TabIndex = 3;
             // 
             // Registration
             // 

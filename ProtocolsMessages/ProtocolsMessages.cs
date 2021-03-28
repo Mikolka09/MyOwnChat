@@ -67,7 +67,7 @@ namespace ProtocolsMessages
 
         public static void SaveClients(DataClient data)
         {
-            using (FileStream fs = new FileStream(data.pathFile, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(data.pathFile, FileMode.Create))
             {
                 br.Serialize(fs, data.clientsFile);
             }

@@ -125,6 +125,12 @@ namespace MyOwnChat
                         SendToEveryone(client, messEveryone);
                     }
                     break;
+                    case "create":
+                    {
+                        client = clients[clients.FindIndex((x) => x.Name == message[0])];
+                        Console.WriteLine($"Client created Admin with Name: {client.Name} and IP: {client.EndPointClient.Address}");
+                        break;
+                    }
                 case "other":
                     {
                         client = clients[clients.FindIndex((x) => x.Name == message[2])];

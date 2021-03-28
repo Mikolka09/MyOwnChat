@@ -46,7 +46,7 @@ namespace ClientChat
             this.dateTimePickerBirthday.Location = new System.Drawing.Point(32, 249);
             this.dateTimePickerBirthday.Name = "dateTimePickerBirthday";
             this.dateTimePickerBirthday.Size = new System.Drawing.Size(245, 22);
-            this.dateTimePickerBirthday.TabIndex = 26;
+            this.dateTimePickerBirthday.TabIndex = 20;
             // 
             // label4
             // 

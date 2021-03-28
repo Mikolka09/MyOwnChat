@@ -329,13 +329,10 @@ namespace ClientChat
             listViewClients.Items.Clear();
             foreach (var item in data.clientsFile)
             {
-                if (item.Name != "Admin")
-                {
-                    ListViewItem it = new ListViewItem(item.Name);
-                    it.SubItems.Add(item.CountBadWord.ToString());
-                    it.SubItems.Add(item.Birthday);
-                    listViewClients.Items.Add(it);
-                }
+                ListViewItem it = new ListViewItem(item.Name);
+                it.SubItems.Add(item.CountBadWord.ToString());
+                it.SubItems.Add(item.Birthday);
+                listViewClients.Items.Add(it);
             }
             buttonSaveContacts.Enabled = true;
             buttonLoadContacts.Enabled = false;
@@ -395,6 +392,21 @@ namespace ClientChat
         {
             if (login[0] == "Admin")
             {
+                List<Client> newList = new List<Client>();
+                foreach (ListViewItem item in listViewClients.Items)
+                {
+                    Client client = new Client();
+                    client.Name = item.SubItems[0].Text;
+                    client.Password = data.clientsFile[data.clientsFile.FindIndex((x) => x.Name == client.Name)].Password;
+                    client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
+                    client.Birthday = item.SubItems[2].Text;
+                    newList.Add(client);
+                }
+                data.clientsFile.Clear();
+                foreach (var item in newList)
+                {
+                    data.clientsFile.Add(item);
+                }
                 BinarySaveLoad.SaveClients(data);
                 MessageBox.Show("Clients Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -497,22 +509,31 @@ namespace ClientChat
                     client = new Client();
                     ListViewItem item = listViewClients.SelectedItems[0];
                     client.Name = item.SubItems[0].Text;
+                    string name = client.Name;
                     client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
                     client.Birthday = item.SubItems[2].Text; ;
                     client.Password = data.clientsFile[data.clientsFile.FindIndex((x) => x.Name == client.Name)].Password;
                     if (edit.ShowDialog(this) == DialogResult.OK)
                     {
                         client = edit.client;
-                        if (!data.clientsFile.Exists((x) => x.Name == client.Name))
+                        if (client.Name != name)
                         {
-                            k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
-                            res = false;
+                            if (!data.clientsFile.Exists((x) => x.Name == client.Name))
+                            {
+                                k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
+                                res = false;
+                            }
+                            else
+                            {
+                                MessageBox.Show("There is already a user with this login, please try again!", "Warning",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                res = true;
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("There is already a user with this login, please try again!", "Warning", 
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            res = true;
+                            k = data.clientsFile.FindIndex((x) => x.Name == client.Name);
+                            res = false;
                         }
                     }
                 }

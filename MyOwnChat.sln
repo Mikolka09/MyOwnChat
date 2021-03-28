@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtocolsMessages", "Protoc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientChat", "ClientChat\ClientChat.csproj", "{2C049E4D-9207-47AA-81E8-D8F251D21F11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseProtocol", "DataBaseProtocol\DataBaseProtocol.csproj", "{B064D644-16B8-42D7-B6C1-E76054FCDEE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2C049E4D-9207-47AA-81E8-D8F251D21F11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C049E4D-9207-47AA-81E8-D8F251D21F11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C049E4D-9207-47AA-81E8-D8F251D21F11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B064D644-16B8-42D7-B6C1-E76054FCDEE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B064D644-16B8-42D7-B6C1-E76054FCDEE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B064D644-16B8-42D7-B6C1-E76054FCDEE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B064D644-16B8-42D7-B6C1-E76054FCDEE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

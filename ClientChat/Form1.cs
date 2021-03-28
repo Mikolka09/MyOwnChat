@@ -14,6 +14,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
+using DataBaseProtocol;
 
 namespace ClientChat
 {
@@ -66,7 +67,7 @@ namespace ClientChat
 
         private void StartChat()
         {
-            buttonSend.Enabled = true;
+            buttonSend.Enabled = false;
             textBoxMessage.Enabled = true;
             ReceiveAsync();
         }
@@ -144,7 +145,10 @@ namespace ClientChat
                                 ListViewItem it = new ListViewItem(print);
                                 if (i == 2) it.ForeColor = color;
                                 if (listViewMessages.InvokeRequired)
+                                {     
                                     listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(it)));
+                                    listViewMessages.Invoke(new Action(() => listViewMessages.EnsureVisible(listViewMessages.Items.Count - 1)));
+                                }
                             }
                         }
 
@@ -247,7 +251,8 @@ namespace ClientChat
                         listViewMessages.Items.Clear();
                         listViewMessages.Columns[0].Width = listViewMessages.Width - 5;
                         listViewMessages.Columns[0].Text = "SERVER CONNEСTOR: " + DateTime.Now.ToString();
-                        buttonSend.Enabled = true;
+                        buttonSend.Enabled = false;
+                        buttonSaveFile.Enabled = false;
                         textBoxMessage.Enabled = true;
                         buttonSaveContacts.Enabled = false;
                         textBoxFileName.Enabled = false;
@@ -282,8 +287,6 @@ namespace ClientChat
                 message[0] = "";
                 message[1] = "exit";
                 buttonSend_Click(this, new EventArgs());
-                socket.SendTimeout = 500;
-                socket.Close();
                 Close();
             }
             else
@@ -688,9 +691,7 @@ namespace ClientChat
                 if (textBoxFileName.InvokeRequired)
                     textBoxFileName.Invoke(new Action(() => textBoxFileName.Text = name));
                 exp = "." + name.Split('.')[1];
-                Thread thread = new Thread(SaveFile);
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
+               buttonSaveFile.Enabled = true;
             }
         }
 
@@ -708,6 +709,7 @@ namespace ClientChat
                     MessageBox.Show("File Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 textBoxFileName.Clear();
+                buttonSaveFile.Enabled = false;
             }
             catch { throw; }
 
@@ -716,9 +718,9 @@ namespace ClientChat
         private string ReceiveLogin()
         {
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
-            string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
-            if (str.Length > 2)
-                return str[0].Split()[1];
+            string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries)[0].Split();
+            if (str.Length == 2)
+                return str[1];
             else
                 return str[0];
         }
@@ -748,7 +750,12 @@ namespace ClientChat
 
         private void textBoxMessage_TextChanged(object sender, EventArgs e)
         {
+            buttonSend.Enabled = true;
+        }
 
+        private void buttonSaveFile_Click(object sender, EventArgs e)
+        {
+            SaveFile();
         }
     }
 

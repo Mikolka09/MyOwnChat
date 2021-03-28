@@ -59,10 +59,11 @@ namespace ClientChat
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBoxFileName = new System.Windows.Forms.TextBox();
             this.buttonSendFileAll = new System.Windows.Forms.Button();
             this.visualStyler1 = new SkinSoft.VisualStyler.VisualStyler(this.components);
-            this.textBoxFileName = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.buttonSaveFile = new System.Windows.Forms.Button();
             this.contextMenuStripMessages.SuspendLayout();
             this.contextMenuStripContacts.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -116,10 +117,12 @@ namespace ClientChat
             // 
             // listViewMessages
             // 
+            this.listViewMessages.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
             this.listViewMessages.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader4});
             this.listViewMessages.ContextMenuStrip = this.contextMenuStripMessages;
             this.listViewMessages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.listViewMessages.FullRowSelect = true;
             this.listViewMessages.Location = new System.Drawing.Point(12, 32);
             this.listViewMessages.Name = "listViewMessages";
             this.listViewMessages.Size = new System.Drawing.Size(524, 404);
@@ -306,15 +309,35 @@ namespace ClientChat
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.buttonSaveFile);
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.textBoxFileName);
             this.groupBox3.Controls.Add(this.buttonSendFileAll);
             this.groupBox3.Location = new System.Drawing.Point(12, 484);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(524, 60);
+            this.groupBox3.Size = new System.Drawing.Size(545, 60);
             this.groupBox3.TabIndex = 12;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "SEND AND LOAD FILE";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label5.Location = new System.Drawing.Point(146, 29);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 17);
+            this.label5.TabIndex = 19;
+            this.label5.Text = "Receive File";
+            // 
+            // textBoxFileName
+            // 
+            this.textBoxFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxFileName.Location = new System.Drawing.Point(259, 21);
+            this.textBoxFileName.Multiline = true;
+            this.textBoxFileName.Name = "textBoxFileName";
+            this.textBoxFileName.Size = new System.Drawing.Size(179, 32);
+            this.textBoxFileName.TabIndex = 18;
             // 
             // buttonSendFileAll
             // 
@@ -335,24 +358,17 @@ namespace ClientChat
             this.visualStyler1.License = ((SkinSoft.VisualStyler.Licensing.VisualStylerLicense)(resources.GetObject("visualStyler1.License")));
             this.visualStyler1.LoadVisualStyle(null, "Office2007 (Black).vssf");
             // 
-            // textBoxFileName
+            // buttonSaveFile
             // 
-            this.textBoxFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxFileName.Location = new System.Drawing.Point(259, 21);
-            this.textBoxFileName.Multiline = true;
-            this.textBoxFileName.Name = "textBoxFileName";
-            this.textBoxFileName.Size = new System.Drawing.Size(259, 32);
-            this.textBoxFileName.TabIndex = 18;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(146, 29);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(97, 17);
-            this.label5.TabIndex = 19;
-            this.label5.Text = "Receive File";
+            this.buttonSaveFile.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonSaveFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSaveFile.Location = new System.Drawing.Point(444, 21);
+            this.buttonSaveFile.Name = "buttonSaveFile";
+            this.buttonSaveFile.Size = new System.Drawing.Size(95, 32);
+            this.buttonSaveFile.TabIndex = 20;
+            this.buttonSaveFile.Text = "SaveFile";
+            this.buttonSaveFile.UseVisualStyleBackColor = false;
+            this.buttonSaveFile.Click += new System.EventHandler(this.buttonSaveFile_Click);
             // 
             // Form1
             // 
@@ -414,6 +430,7 @@ namespace ClientChat
         private System.Windows.Forms.ToolStripMenuItem sendFileToolStripMenuItem;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBoxFileName;
+        private System.Windows.Forms.Button buttonSaveFile;
     }
 }
 

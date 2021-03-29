@@ -49,7 +49,6 @@ namespace ClientChat
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.checkBoxGroups = new System.Windows.Forms.CheckBox();
             this.buttonLoadContacts = new System.Windows.Forms.Button();
             this.buttonSaveContacts = new System.Windows.Forms.Button();
             this.listViewContacts = new System.Windows.Forms.ListView();
@@ -59,11 +58,13 @@ namespace ClientChat
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.buttonSaveFile = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxFileName = new System.Windows.Forms.TextBox();
             this.buttonSendFileAll = new System.Windows.Forms.Button();
             this.visualStyler1 = new SkinSoft.VisualStyler.VisualStyler(this.components);
-            this.buttonSaveFile = new System.Windows.Forms.Button();
+            this.buttonGroupChat = new System.Windows.Forms.Button();
+            this.buttonCloseGroup = new System.Windows.Forms.Button();
             this.contextMenuStripMessages.SuspendLayout();
             this.contextMenuStripContacts.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -193,13 +194,12 @@ namespace ClientChat
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.listViewClients);
-            this.groupBox2.Controls.Add(this.checkBoxGroups);
             this.groupBox2.Controls.Add(this.buttonLoadContacts);
             this.groupBox2.Controls.Add(this.buttonSaveContacts);
             this.groupBox2.Controls.Add(this.listViewContacts);
             this.groupBox2.Location = new System.Drawing.Point(542, 11);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(246, 465);
+            this.groupBox2.Size = new System.Drawing.Size(246, 451);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "MY CONTACTS";
@@ -211,9 +211,9 @@ namespace ClientChat
             this.columnHeader2,
             this.columnHeader3});
             this.listViewClients.ContextMenuStrip = this.contextMenuStripContacts;
-            this.listViewClients.Location = new System.Drawing.Point(6, 22);
+            this.listViewClients.Location = new System.Drawing.Point(6, 26);
             this.listViewClients.Name = "listViewClients";
-            this.listViewClients.Size = new System.Drawing.Size(234, 403);
+            this.listViewClients.Size = new System.Drawing.Size(234, 386);
             this.listViewClients.TabIndex = 16;
             this.listViewClients.UseCompatibleStateImageBehavior = false;
             this.listViewClients.View = System.Windows.Forms.View.Details;
@@ -234,25 +234,13 @@ namespace ClientChat
             this.columnHeader3.Text = "BIRTHDAY";
             this.columnHeader3.Width = 81;
             // 
-            // checkBoxGroups
-            // 
-            this.checkBoxGroups.AutoSize = true;
-            this.checkBoxGroups.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.checkBoxGroups.Location = new System.Drawing.Point(148, 434);
-            this.checkBoxGroups.Name = "checkBoxGroups";
-            this.checkBoxGroups.Size = new System.Drawing.Size(83, 21);
-            this.checkBoxGroups.TabIndex = 15;
-            this.checkBoxGroups.Text = "Groups";
-            this.checkBoxGroups.UseVisualStyleBackColor = true;
-            this.checkBoxGroups.CheckedChanged += new System.EventHandler(this.checkBoxGroups_CheckedChanged);
-            // 
             // buttonLoadContacts
             // 
             this.buttonLoadContacts.BackColor = System.Drawing.SystemColors.Control;
             this.buttonLoadContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonLoadContacts.Location = new System.Drawing.Point(73, 428);
+            this.buttonLoadContacts.Location = new System.Drawing.Point(145, 414);
             this.buttonLoadContacts.Name = "buttonLoadContacts";
-            this.buttonLoadContacts.Size = new System.Drawing.Size(65, 32);
+            this.buttonLoadContacts.Size = new System.Drawing.Size(77, 32);
             this.buttonLoadContacts.TabIndex = 14;
             this.buttonLoadContacts.Text = "Load";
             this.buttonLoadContacts.UseVisualStyleBackColor = false;
@@ -262,9 +250,9 @@ namespace ClientChat
             // 
             this.buttonSaveContacts.BackColor = System.Drawing.SystemColors.Control;
             this.buttonSaveContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonSaveContacts.Location = new System.Drawing.Point(6, 427);
+            this.buttonSaveContacts.Location = new System.Drawing.Point(23, 414);
             this.buttonSaveContacts.Name = "buttonSaveContacts";
-            this.buttonSaveContacts.Size = new System.Drawing.Size(61, 32);
+            this.buttonSaveContacts.Size = new System.Drawing.Size(78, 32);
             this.buttonSaveContacts.TabIndex = 13;
             this.buttonSaveContacts.Text = "Save";
             this.buttonSaveContacts.UseVisualStyleBackColor = false;
@@ -272,7 +260,6 @@ namespace ClientChat
             // 
             // listViewContacts
             // 
-            this.listViewContacts.CheckBoxes = true;
             this.listViewContacts.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnLogin,
             this.columnName,
@@ -282,7 +269,7 @@ namespace ClientChat
             this.listViewContacts.FullRowSelect = true;
             this.listViewContacts.Location = new System.Drawing.Point(6, 26);
             this.listViewContacts.Name = "listViewContacts";
-            this.listViewContacts.Size = new System.Drawing.Size(234, 399);
+            this.listViewContacts.Size = new System.Drawing.Size(234, 382);
             this.listViewContacts.TabIndex = 0;
             this.listViewContacts.UseCompatibleStateImageBehavior = false;
             this.listViewContacts.View = System.Windows.Forms.View.Details;
@@ -319,6 +306,18 @@ namespace ClientChat
             this.groupBox3.TabIndex = 12;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "SEND AND LOAD FILE";
+            // 
+            // buttonSaveFile
+            // 
+            this.buttonSaveFile.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonSaveFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSaveFile.Location = new System.Drawing.Point(444, 21);
+            this.buttonSaveFile.Name = "buttonSaveFile";
+            this.buttonSaveFile.Size = new System.Drawing.Size(95, 32);
+            this.buttonSaveFile.TabIndex = 20;
+            this.buttonSaveFile.Text = "SaveFile";
+            this.buttonSaveFile.UseVisualStyleBackColor = false;
+            this.buttonSaveFile.Click += new System.EventHandler(this.buttonSaveFile_Click);
             // 
             // label5
             // 
@@ -358,23 +357,37 @@ namespace ClientChat
             this.visualStyler1.License = ((SkinSoft.VisualStyler.Licensing.VisualStylerLicense)(resources.GetObject("visualStyler1.License")));
             this.visualStyler1.LoadVisualStyle(null, "Office2007 (Black).vssf");
             // 
-            // buttonSaveFile
+            // buttonGroupChat
             // 
-            this.buttonSaveFile.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonSaveFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonSaveFile.Location = new System.Drawing.Point(444, 21);
-            this.buttonSaveFile.Name = "buttonSaveFile";
-            this.buttonSaveFile.Size = new System.Drawing.Size(95, 32);
-            this.buttonSaveFile.TabIndex = 20;
-            this.buttonSaveFile.Text = "SaveFile";
-            this.buttonSaveFile.UseVisualStyleBackColor = false;
-            this.buttonSaveFile.Click += new System.EventHandler(this.buttonSaveFile_Click);
+            this.buttonGroupChat.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonGroupChat.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonGroupChat.Location = new System.Drawing.Point(563, 468);
+            this.buttonGroupChat.Name = "buttonGroupChat";
+            this.buttonGroupChat.Size = new System.Drawing.Size(123, 31);
+            this.buttonGroupChat.TabIndex = 17;
+            this.buttonGroupChat.Text = "CreateGroup";
+            this.buttonGroupChat.UseVisualStyleBackColor = false;
+            this.buttonGroupChat.Click += new System.EventHandler(this.buttonGroupChat_Click);
+            // 
+            // buttonCloseGroup
+            // 
+            this.buttonCloseGroup.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonCloseGroup.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonCloseGroup.Location = new System.Drawing.Point(565, 513);
+            this.buttonCloseGroup.Name = "buttonCloseGroup";
+            this.buttonCloseGroup.Size = new System.Drawing.Size(112, 29);
+            this.buttonCloseGroup.TabIndex = 18;
+            this.buttonCloseGroup.Text = "CloseGroup";
+            this.buttonCloseGroup.UseVisualStyleBackColor = false;
+            this.buttonCloseGroup.Click += new System.EventHandler(this.buttonCloseGroup_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(797, 554);
+            this.Controls.Add(this.buttonCloseGroup);
+            this.Controls.Add(this.buttonGroupChat);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.listViewMessages);
@@ -388,7 +401,6 @@ namespace ClientChat
             this.contextMenuStripMessages.ResumeLayout(false);
             this.contextMenuStripContacts.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.visualStyler1)).EndInit();
@@ -416,7 +428,6 @@ namespace ClientChat
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnTag;
-        private System.Windows.Forms.CheckBox checkBoxGroups;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button buttonSendFileAll;
         private System.Windows.Forms.ListView listViewClients;
@@ -431,6 +442,8 @@ namespace ClientChat
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBoxFileName;
         private System.Windows.Forms.Button buttonSaveFile;
+        private System.Windows.Forms.Button buttonGroupChat;
+        private System.Windows.Forms.Button buttonCloseGroup;
     }
 }
 

@@ -141,6 +141,16 @@ namespace MyOwnChat
                         SendToEveryone(client, message);
                         break;
                     }
+                case "close":
+                    {
+                        client = clients[clients.FindIndex((x) => x.Name == message[2])];
+                        string messCen = CensoringPosts(message[0], client);
+                        string mess = $"[{client.Name}]: " + messCen;
+                        message[0] = mess;
+                        Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
+                        SendToEveryone(client, message);
+                        break;
+                    }
                 case "private":
                     {
                         Client clientSend = new Client();
@@ -276,7 +286,7 @@ namespace MyOwnChat
                 foreach (var item in clientsReceive)
                 {
                     Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Array = message }));
-                    Console.WriteLine($"Private message has been sent: {clientSend.Name} from: {item.Name}");
+                    Console.WriteLine($"Group message has been sent: {clientSend.Name} from: {item.Name}");
                 }
                 Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = message }));
             }

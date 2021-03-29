@@ -16,6 +16,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using DataBaseProtocol;
 
+
 namespace ClientChat
 {
     public partial class Form1 : Form
@@ -28,7 +29,8 @@ namespace ClientChat
         private int port = 1250;
         private string[] login;
         public string[] message;
-        private List<Contact> contacts;
+        public List<Contact> contacts;
+        public List<Contact> contactsGroup;
         private List<Contact> tempContacts;
         private Random rand;
         public Contact Cont;
@@ -40,6 +42,9 @@ namespace ClientChat
         private List<byte[]> fileByte;
         public DataClient data;
         public Client client;
+        public List<string> contCheck;
+        public string nameGroup;
+
 
         public Form1()
         {
@@ -65,14 +70,14 @@ namespace ClientChat
             }
         }
 
-        private void StartChat()
+        public void StartChat()
         {
             buttonSend.Enabled = false;
             textBoxMessage.Enabled = true;
             ReceiveAsync();
         }
 
-        private void CreateTempContact(string log, string nm, string tg, Color color)
+        public void CreateTempContact(string log, string nm, string tg, Color color)
         {
             Contact cnt = new Contact()
             {
@@ -84,7 +89,7 @@ namespace ClientChat
             tempContacts.Add(cnt);
         }
 
-        private Color ContactColor(string buff, Color color)
+        public Color ContactColor(string buff, Color color)
         {
             if (tempContacts.Count != 0)
             {
@@ -112,7 +117,7 @@ namespace ClientChat
             }
         }
 
-        private async void ReceiveAsync()
+        public async void ReceiveAsync()
         {
             try
             {
@@ -145,7 +150,7 @@ namespace ClientChat
                                 ListViewItem it = new ListViewItem(print);
                                 if (i == 2) it.ForeColor = color;
                                 if (listViewMessages.InvokeRequired)
-                                {     
+                                {
                                     listViewMessages.Invoke(new Action(() => listViewMessages.Items.Add(it)));
                                     listViewMessages.Invoke(new Action(() => listViewMessages.EnsureVisible(listViewMessages.Items.Count - 1)));
                                 }
@@ -158,7 +163,7 @@ namespace ClientChat
             catch (Exception) { throw; }
         }
 
-        private void CheckReceives(string[] mess)
+        public void CheckReceives(string[] mess)
         {
             string messCheck = mess[1];
             switch (messCheck)
@@ -192,8 +197,7 @@ namespace ClientChat
                                 messAns[2] = login[0];
                                 messAns[3] = logs;
                                 message = messAns;
-                                if (checkBoxGroups.InvokeRequired)
-                                    checkBoxGroups.Invoke(new Action(() => checkBoxGroups.Checked = true));
+
                             }
                             else
                             {
@@ -207,6 +211,17 @@ namespace ClientChat
                         }
                     }
                     break;
+                case "close":
+                    {
+                        string[] messAns = new string[4];
+                        messAns[0] = $"Sorry, group \"{nameGroup}\" CLOSE!";
+                        messAns[1] = "other";
+                        messAns[2] = login[0];
+                        messAns[3] = "";
+                        message = messAns;
+                        Transfer.SendTCP(socket, new DataMessage() { Array = message });
+                        break;
+                    }
                 default:
                     break;
             }
@@ -231,12 +246,10 @@ namespace ClientChat
                             data.clientsFile = new List<Client>();
                             listViewContacts.Visible = false;
                             listViewClients.Visible = true;
-                            checkBoxGroups.Visible = false;
                             groupBox2.Text = "CONTACTS CLIENTS";
                         }
                         else
                         {
-                            checkBoxGroups.Visible = true;
                             listViewContacts.Visible = true;
                             listViewClients.Visible = false;
                             groupBox2.Text = "MY CONTACTS";
@@ -256,6 +269,7 @@ namespace ClientChat
                         textBoxMessage.Enabled = true;
                         buttonSaveContacts.Enabled = false;
                         textBoxFileName.Enabled = false;
+                        buttonCloseGroup.Enabled = false;
                         this.Text = "MYOWNCHAT: " + $"Login - {login[0]}";
                         StartChat();
                     }
@@ -269,7 +283,7 @@ namespace ClientChat
             catch { }
         }
 
-        private void buttonSend_Click(object sender, EventArgs e)
+        public void buttonSend_Click(object sender, EventArgs e)
         {
             try
             {
@@ -280,7 +294,7 @@ namespace ClientChat
             catch (Exception) { throw; }
         }
 
-        private void buttonExit_Click(object sender, EventArgs e)
+        public void buttonExit_Click(object sender, EventArgs e)
         {
             if (socket.Connected)
             {
@@ -444,7 +458,7 @@ namespace ClientChat
             }
         }
 
-        private void listViewContacts_ColumnClick(object sender, ColumnClickEventArgs e)
+        public void listViewContacts_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (login[0] == "Admin")
             {
@@ -541,7 +555,7 @@ namespace ClientChat
                     }
                 }
                 data.clientsFile.RemoveAt(k);
-                data.clientsFile.Add(edit.client);
+                data.clientsFile.Add(client);
                 AddToListViewClients();
                 MessageBox.Show("Client Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -631,34 +645,37 @@ namespace ClientChat
 
         private void checkBoxGroups_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxGroups.Checked)
+            string logins = "";
+            for (int i = 0; i < contactsGroup.Count; i++)
             {
-                string logins = "";
-                ListView.CheckedListViewItemCollection selectedList = listViewContacts.CheckedItems;
-                for (int i = 0; i < selectedList.Count; i++)
-                {
-                    if (i < selectedList.Count - 1)
-                        logins += selectedList[i].Text + " ";
-                    else
-                        logins += selectedList[i].Text;
-                }
-                message[1] = "group";
-                message[2] = login[0];
-                if (logins != "")
-                    message[3] = logins;
+                if (i < contactsGroup.Count - 1)
+                    logins += contactsGroup[i].Login + " ";
                 else
-                    message[3] = logs;
+                    logins += contactsGroup[i].Login;
             }
+            message[1] = "group";
+            message[2] = login[0];
+            if (logins != "")
+                message[3] = logins;
             else
-            {
-                message[1] = "other";
-                message[2] = login[0];
-                message[3] = "";
-                countMess = 0;
-            }
+                message[3] = logs;
+            message[0] = $"Wellcome to group \"{nameGroup}\"";
+            Transfer.SendTCP(socket, new DataMessage() { Array = message });
         }
 
-        private void SendFile(string log)
+        private void buttonCloseGroup_Click(object sender, EventArgs e)
+        {
+            buttonCloseGroup.Enabled = false;
+            buttonGroupChat.Enabled = true;
+            message[0] = "Start to close group!"; 
+            message[1] = "close";
+            message[2] = login[0];
+            message[3] = "";
+            countMess = 0;
+            Transfer.SendTCP(socket, new DataMessage() { Array = message });
+        }
+
+        public void SendFile(string log)
         {
             if (fileByte.Count > 0)
                 fileByte.Clear();
@@ -674,7 +691,7 @@ namespace ClientChat
             MessageBox.Show($"File sent from \"{log}\"!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void buttonSendFileAll_Click(object sender, EventArgs e)
+        public void buttonSendFileAll_Click(object sender, EventArgs e)
         {
             openFileDialog1.Filter = "All files (*.*)|*.*|Text File (*.txt)|*.txt";
             tagMessage = "other";
@@ -682,7 +699,7 @@ namespace ClientChat
                 SendFile("");
         }
 
-        private void LoadFileByte(List<byte[]> file)
+        public void LoadFileByte(List<byte[]> file)
         {
             string name = Encoding.Default.GetString(file[1]);
             if (MessageBox.Show($"You received a file \"{name}\" from \"{message[2]}\", do you want to keep it?", "Messsage",
@@ -691,12 +708,12 @@ namespace ClientChat
                 if (textBoxFileName.InvokeRequired)
                     textBoxFileName.Invoke(new Action(() => textBoxFileName.Text = name));
                 exp = "." + name.Split('.')[1];
-               buttonSaveFile.Enabled = true;
+                buttonSaveFile.Enabled = true;
             }
         }
 
 
-        private void SaveFile()
+        public void SaveFile()
         {
             try
             {
@@ -715,7 +732,7 @@ namespace ClientChat
 
         }
 
-        private string ReceiveLogin()
+        public string ReceiveLogin()
         {
             string buff = listViewMessages.Items[listViewMessages.FocusedItem.Index].Text;
             string[] str = buff.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries)[0].Split();
@@ -757,6 +774,29 @@ namespace ClientChat
         {
             SaveFile();
         }
+
+        private void buttonGroupChat_Click(object sender, EventArgs e)
+        {
+            contCheck = new List<string>();
+            contactsGroup = new List<Contact>();
+            nameGroup = "";
+            buttonLoadContacts_Click(this, new EventArgs());
+            CreateGroup create = new CreateGroup();
+            if (create.ShowDialog(this) == DialogResult.OK)
+            {
+                contCheck = create.contactsCheck;
+                nameGroup = create.nameGroup;
+                foreach (var it in contCheck)
+                {
+                    contactsGroup.Add(contacts[contacts.FindIndex((x) => x.Login == it)]);
+                }
+                buttonCloseGroup.Enabled = true;
+                buttonGroupChat.Enabled = false;
+                checkBoxGroups_CheckedChanged(this, new EventArgs());
+
+            }
+        }
+
     }
 
     [Serializable]

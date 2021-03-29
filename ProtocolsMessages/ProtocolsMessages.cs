@@ -8,7 +8,8 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
-using System.Security.Permissions;
+using System.Drawing;
+
 
 namespace ProtocolsMessages
 {
@@ -96,6 +97,59 @@ namespace ProtocolsMessages
 
 
 
+    }
+
+    public class User
+    {
+        
+        public int Id { get; set; }
+       
+        public string Login { get; set; }
+       
+        public string Password { get; set; }
+       
+        public int CountBadWord { get; set; }
+       
+        public string Birthday { get; set; }
+
+        public TcpClient ClientTcp { get; set; }
+
+        public IPEndPoint EndPointClient { get; set; }
+    }
+
+    
+    public class Message
+    {
+        
+        public int Id { get; set; }
+        
+        public string Text { get; set; }
+       
+        public string Priorety { get; set; }
+        
+        public string LoginSend { get; set; }
+       
+        public string LoginReceive { get; set; }
+        
+        public string Answer { get; set; }
+       
+        public string Moment { get; set; }
+
+    }
+
+    
+    public class Contact
+    {
+        
+        public int Id { get; set; }
+        
+        public string Login { get; set; }
+        
+        public string Name { get; set; }
+        
+        public string Tag { get; set; }
+       
+        public Color Color { get; set; }
     }
 
 

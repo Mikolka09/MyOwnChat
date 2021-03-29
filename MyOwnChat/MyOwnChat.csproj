@@ -38,6 +38,8 @@
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
     </Reference>
@@ -68,6 +70,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DataBaseProtocol\DataBaseProtocol.csproj">
+      <Project>{b064d644-16b8-42d7-b6c1-e76054fcdee5}</Project>
+      <Name>DataBaseProtocol</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ProtocolsMessages\ProtocolsMessages.csproj">
       <Project>{dd73e6da-27f1-4c0b-99da-470fa724a8af}</Project>
       <Name>ProtocolsMessages</Name>

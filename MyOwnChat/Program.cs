@@ -10,6 +10,8 @@ using ProtocolsMessages;
 using System.Threading;
 using DataBaseProtocol;
 using System.Text.RegularExpressions;
+using System.Data.Linq;
+using System.Data.Linq.Mapping;
 
 namespace MyOwnChat
 {
@@ -21,25 +23,24 @@ namespace MyOwnChat
         private static TcpListener server;
         private static string address = "127.0.0.1";
         private static int port = 1250;
-        public static DataClient dataClient;
-        private static List<Client> clients;
+        private static List<User> users;
+        public static List<User> usersBase;
         private static object lck;
         private static CancellationTokenSource tokenStop;
-        private static string[] messEveryone;
+        private static Message messEveryone;
 
         static void Main(string[] args)
         {
             iP = IPAddress.Parse(address);
             endPoint = new IPEndPoint(iP, port);
             server = new TcpListener(endPoint);
-            clients = new List<Client>();
-            dataClient = new DataClient();
-            dataClient.clientsFile = new List<Client>();
+            users = new List<User>();
+            usersBase = new List<User>();
+            if (LoadData.LoadUser() != null)
+                usersBase = LoadData.LoadUser();
             lck = new object();
             tokenStop = new CancellationTokenSource();
-            messEveryone = new string[5];
-            if (File.Exists(dataClient.pathFile))
-                BinarySaveLoad.LoadClients(dataClient);
+            messEveryone = new Message();
             server.Start(50);
 
             Console.WriteLine($"Server started: {endPoint.Address} : {endPoint.Port}");
@@ -79,7 +80,7 @@ namespace MyOwnChat
                     if (data is DataFile)
                         ServerCheckSendFile(((DataFile)data).FileByte);
                     else
-                        ServerMediator(socket, ((DataMessage)data).Array);
+                        ServerMediator(socket, data);
                 }
             }
             catch (OperationCanceledException) { }
@@ -94,7 +95,7 @@ namespace MyOwnChat
             return cnt;
         }
 
-        private static string CensoringPosts(string message, Client client)
+        private static string CensoringPosts(User user, string message)
         {
             string[] badWord = {"fuck", "shit", "son of a bitch", "asshole", "bint", "bollocks", "munter", "bastard", "snatch", "dick",
                                 "козел", "сука", "урод", "дерьмо", "член", "ублюдок"};
@@ -103,90 +104,107 @@ namespace MyOwnChat
             foreach (var item in badWord)
             {
                 string reg = "\\b" + $"{item}" + "\\b";
-                client.CountBadWord += CountOneWord(txt, reg);
+                user.CountBadWord += CountOneWord(txt, reg);
                 txt = Regex.Replace(txt, reg, change, RegexOptions.IgnoreCase);
             }
             return txt;
         }
 
-        private static void ServerMediator(TcpClient socket, string[] message)
+        private static void ServerMediator(TcpClient socket, Data data)
         {
-            Client client = new Client();
-            string messCheck = message[1];
+            User user = new User();
+            string messCheck = "";
+            if (data is DataMessage)
+                messCheck = ((DataMessage)data).Message.Priorety;
+            else if (data is DataUser)
+                messCheck = ((DataUser)data).User.Tag;
             switch (messCheck)
             {
                 case "avtorization":
-                    if (LoginCheck(socket, message))
+                    if (LoginCheck(socket, (DataUser)data))
                     {
-                        client = clients[clients.FindIndex((x) => x.Name == message[0])];
-                        Console.WriteLine($"Client connected with Name: {client.Name} and IP: {client.EndPointClient.Address}");
-                        messEveryone[0] = $"{client.Name} joined to chat";
-                        SendToEveryone(client, messEveryone);
+                        user = users[users.FindIndex((x) => x.Login == ((DataUser)data).User.Login)];
+                        Console.WriteLine($"Client connected with Name: {user.Login} and IP: {user.EndPointClient.Address}");
+                        messEveryone.Text = $"{user.Login} joined to chat";
+                        messEveryone.Moment = DateTime.Now.ToLongTimeString();
+                        messEveryone.LoginSend = user.Login;
+                        messEveryone.Priorety = "avtorization";
+                        messEveryone.LoginReceive = "";
+                        messEveryone.Answer = "";
+                        SaveData.SaveMessage(messEveryone);
+                        SendToEveryone(user, messEveryone);
                     }
                     break;
                 case "create":
                     {
-                        client = clients[clients.FindIndex((x) => x.Name == message[0])];
-                        Console.WriteLine($"Client created Admin with Name: {client.Name} and IP: {client.EndPointClient.Address}");
+                        user = users[users.FindIndex((x) => x.Login == ((DataUser)data).User.Login)];
+                        Console.WriteLine($"Client created Admin with Name: {user.Login} and IP: {user.EndPointClient.Address}");
                         break;
                     }
                 case "other":
                     {
-                        client = clients[clients.FindIndex((x) => x.Name == message[2])];
-                        string messCen = CensoringPosts(message[0], client);
-                        string mess = $"[{client.Name}]: " + messCen;
-                        message[0] = mess;
-                        Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
-                        SendToEveryone(client, message);
+                        user = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        string messCen = CensoringPosts(user, ((DataMessage)data).Message.Text);
+                        string mess = $"[{user.Login}]: " + messCen;
+                        ((DataMessage)data).Message.Text = mess;
+                        Console.WriteLine($"Message has been received: {user.Login} and IP: {user.EndPointClient.Address}");
+                        SaveData.SaveMessage(((DataMessage)data).Message);
+                        SendToEveryone(user, ((DataMessage)data).Message);
                         break;
                     }
                 case "close":
                     {
-                        client = clients[clients.FindIndex((x) => x.Name == message[2])];
-                        string messCen = CensoringPosts(message[0], client);
-                        string mess = $"[{client.Name}]: " + messCen;
-                        message[0] = mess;
-                        Console.WriteLine($"Message has been received: {client.Name} and IP: {client.EndPointClient.Address}");
-                        SendToEveryone(client, message);
+                        user = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        string messCen = CensoringPosts(user, ((DataMessage)data).Message.Text);
+                        string mess = $"[{user.Login}]: " + messCen;
+                        ((DataMessage)data).Message.Text = mess;
+                        SaveData.SaveMessage(((DataMessage)data).Message);
+                        Console.WriteLine($"Message has been received: {user.Login} and IP: {user.EndPointClient.Address}");
+                        SendToEveryone(user, ((DataMessage)data).Message);
                         break;
                     }
                 case "private":
                     {
-                        Client clientSend = new Client();
-                        clientSend = clients[clients.FindIndex((x) => x.Name == message[2])];
-                        Client clientReceive = new Client();
-                        clientReceive = clients[clients.FindIndex((x) => x.Name == message[3])];
-                        string messCen = CensoringPosts(message[0], clientSend);
-                        string mess = $"[Private: {clientSend.Name}]: " + messCen;
-                        message[0] = mess;
-                        SendToPrivateMessage(clientSend, clientReceive, message);
+                        User userSend = new User();
+                        userSend = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        User userReceive = new User();
+                        userReceive = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginReceive)];
+                        string messCen = CensoringPosts(user, ((DataMessage)data).Message.Text);
+                        string mess = $"[Private: {userSend.Login}]: " + messCen;
+                        ((DataMessage)data).Message.Text = mess;
+                        SaveData.SaveMessage(((DataMessage)data).Message);
+                        SendToPrivateMessage(userSend, userReceive, ((DataMessage)data).Message);
                         break;
                     }
                 case "group":
                     {
-                        Client clientSend = new Client();
-                        clientSend = clients[clients.FindIndex((x) => x.Name == message[2])];
-                        string[] clientsR = message[3].Split();
-                        Client[] clientsReceive = new Client[clientsR.Length];
-                        for (int i = 0; i < clientsReceive.Length; i++)
+                        User userSend = new User();
+                        userSend = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        string[] usersR = ((DataMessage)data).Message.LoginReceive.Split();
+                        User[] usersReceive = new User[usersR.Length];
+                        for (int i = 0; i < usersReceive.Length; i++)
                         {
-                            clientsReceive[i] = clients[clients.FindIndex((x) => x.Name == clientsR[i])];
+                            usersReceive[i] = users[users.FindIndex((x) => x.Login == usersR[i])];
                         }
-                        string messCen = CensoringPosts(message[0], clientSend);
-                        string mess = $"[Groups: {clientSend.Name}]: " + messCen;
-                        message[0] = mess;
-                        SendToGroups(clientSend, clientsReceive, message);
+                        string messCen = CensoringPosts(user, ((DataMessage)data).Message.Text);
+                        string mess = $"[Groups: {userSend.Login}]: " + messCen;
+                        ((DataMessage)data).Message.Text = mess;
+                        SaveData.SaveMessage(((DataMessage)data).Message);
+                        SendToGroups(userSend, usersReceive, ((DataMessage)data).Message);
                         break;
                     }
                 case "exit":
                     {
-                        client = clients[clients.FindIndex((x) => x.Name == message[2])];
-                        Console.WriteLine($"Client passed out with Name: {client.Name} and IP: {client.EndPointClient.Address}");
-                        messEveryone[0] = $"{client.Name} left to chat";
-                        SendToEveryone(client, messEveryone);
-                        clients.RemoveAt(clients.FindIndex((x) => x.Name == message[2]));
-                        BinarySaveLoad.SaveClients(dataClient);
-                        // Cancel();
+                        user = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        Console.WriteLine($"Client passed out with Name: {user.Login} and IP: {user.EndPointClient.Address}");
+                        messEveryone.Text = $"{user.Login} left to chat";
+                        messEveryone.Moment = DateTime.Now.ToLongTimeString();
+                        messEveryone.LoginSend = user.Login;
+                        messEveryone.Priorety = "exit";
+                        messEveryone.LoginReceive = "";
+                        messEveryone.Answer = "";
+                        SendToEveryone(user, messEveryone);
+                        users.RemoveAt(users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend));
                         break;
                     }
                 default:
@@ -199,37 +217,39 @@ namespace MyOwnChat
         {
             string name = Encoding.Default.GetString(fileByte[0]);
             string[] mess = new string[3];
-            Client clientSend = new Client();
-            Client clientReceive = new Client();
+            User userSend = new User();
+            User userReceive = new User();
             mess = name.Split();
             switch (mess[2])
             {
                 case "private":
                     {
-                        clientSend = new Client();
-                        clientSend = clients[clients.FindIndex((x) => x.Name == mess[1])];
-                        clientReceive = new Client();
-                        clientReceive = clients[clients.FindIndex((x) => x.Name == mess[0])];
-                        string mes = $"[SendFile: {clientSend.Name}]: File sent!";
-                        string[] sub = new string[4];
-                        sub[0] = mes;
-                        sub[1] = mess[2];
-                        sub[2] = mess[1];
-                        sub[3] = mess[0];
-                        SendToFile(clientSend, clientReceive, fileByte, sub);
+                        userSend = new User();
+                        userSend = users[users.FindIndex((x) => x.Login == mess[1])];
+                        userReceive = new User();
+                        userReceive = users[users.FindIndex((x) => x.Login == mess[0])];
+                        string mes = $"[SendFile: {userSend.Login}]: File sent!";
+                        Message messP = new Message();
+                        messP.Text = mes;
+                        messP.Priorety = mess[2];
+                        messP.LoginSend = mess[1];
+                        messP.LoginReceive = mess[0];
+                        messP.Answer = "";
+                        SendToFile(userSend, userReceive, fileByte, messP);
                         break;
                     }
                 case "other":
                     {
-                        clientSend = new Client();
-                        clientSend = clients[clients.FindIndex((x) => x.Name == mess[1])];
-                        string mes = $"[SendFile: {clientSend.Name}]: File sent!";
-                        string[] sub = new string[4];
-                        sub[0] = mes;
-                        sub[1] = mess[2];
-                        sub[2] = mess[1];
-                        sub[3] = "";
-                        SendToOtherFile(clientSend, fileByte, sub);
+                        userSend = new User();
+                        userSend = users[users.FindIndex((x) => x.Login == mess[1])];
+                        string mes = $"[SendFile: {userSend.Login}]: File sent!";
+                        Message messP = new Message();
+                        messP.Text = mes;
+                        messP.Priorety = mess[2];
+                        messP.LoginSend = mess[1];
+                        messP.LoginReceive = "";
+                        messP.Answer = "";
+                        SendToOtherFile(userSend, fileByte, messP);
                         break;
                     }
                 default:
@@ -237,148 +257,151 @@ namespace MyOwnChat
             }
         }
 
-        private static void SendToOtherFile(Client clientSend, List<byte[]> fileByte, string[] sub)
+        private static void SendToOtherFile(User userSend, List<byte[]> fileByte, Message messP)
         {
             lock (lck)
             {
-                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = sub }));
-                foreach (var item in clients)
+                Task.Run(() => Transfer.SendTCP(userSend.ClientTcp, new DataMessage() { Message = messP }));
+                foreach (var item in users)
                 {
-                    if (item.Name != clientSend.Name)
+                    if (item.Login != userSend.Login)
                     {
-                        Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Array = sub }));
+                        Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Message = messP }));
                         Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataFile() { FileByte = fileByte }));
                     }
                 }
-                Console.WriteLine($"File has been sent: {clientSend.Name} and IP: {clientSend.EndPointClient.Address}");
+                Console.WriteLine($"File has been sent: {userSend.Login} and IP: {userSend.EndPointClient.Address}");
             }
         }
 
 
-        private static void SendToFile(Client clientSend, Client clientReceive, List<byte[]> fileByte, string[] sub)
+        private static void SendToFile(User userSend, User userReceive, List<byte[]> fileByte, Message messP)
         {
             lock (lck)
             {
-                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = sub }));
-                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataMessage() { Array = sub }));
-                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataFile() { FileByte = fileByte }));
+                Task.Run(() => Transfer.SendTCP(userSend.ClientTcp, new DataMessage() { Message = messP }));
+                Task.Run(() => Transfer.SendTCP(userReceive.ClientTcp, new DataMessage() { Message = messP }));
+                Task.Run(() => Transfer.SendTCP(userReceive.ClientTcp, new DataFile() { FileByte = fileByte }));
 
-                Console.WriteLine($"File has been sent: {clientSend.Name} from: {clientReceive.Name}");
+                Console.WriteLine($"File has been sent: {userSend.Login} from: {userReceive.Login}");
             }
         }
 
-        private static void SendToPrivateMessage(Client clientSend, Client clientReceive, string[] message)
+        private static void SendToPrivateMessage(User userSend, User userReceive, Message message)
         {
             lock (lck)
             {
-                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = message }));
-                Task.Run(() => Transfer.SendTCP(clientReceive.ClientTcp, new DataMessage() { Array = message }));
+                Task.Run(() => Transfer.SendTCP(userSend.ClientTcp, new DataMessage() { Message = message }));
+                Task.Run(() => Transfer.SendTCP(userReceive.ClientTcp, new DataMessage() { Message = message }));
 
-                Console.WriteLine($"Private message has been sent: {clientSend.Name} from: {clientReceive.Name}");
+                Console.WriteLine($"Private message has been sent: {userSend.Login} from: {userReceive.Login}");
             }
         }
 
-        private static void SendToGroups(Client clientSend, Client[] clientsReceive, string[] message)
+        private static void SendToGroups(User userSend, User[] usersReceive, Message message)
         {
             lock (lck)
             {
-                foreach (var item in clientsReceive)
+                foreach (var item in usersReceive)
                 {
-                    Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Array = message }));
-                    Console.WriteLine($"Group message has been sent: {clientSend.Name} from: {item.Name}");
+                    Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Message = message }));
+                    Console.WriteLine($"Group message has been sent: {userSend.Login} from: {item.Login}");
                 }
-                Task.Run(() => Transfer.SendTCP(clientSend.ClientTcp, new DataMessage() { Array = message }));
+                Task.Run(() => Transfer.SendTCP(userSend.ClientTcp, new DataMessage() { Message = message }));
             }
         }
 
-        private static bool LoginCheck(TcpClient socket, string[] login)
+        private static bool LoginCheck(TcpClient socket, DataUser data)
         {
-            if (dataClient.clientsFile.Count == 0)
+            if (usersBase.Count == 0)
             {
-                Client client = new Client()
+                User user = new User()
                 {
-                    Name = login[0],
-                    Password = login[2],
-                    CountBadWord = 0,
-                    Birthday = login[3],
+                    Login = data.User.Login,
+                    Password = data.User.Password,
+                    Tag = data.User.Tag,
+                    CountBadWord = data.User.CountBadWord,
+                    Birthday = data.User.Birthday,
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
-
-                dataClient.clientsFile.Add(client);
-                clients.Add(client);
-                BinarySaveLoad.SaveClients(dataClient);
+                
+                usersBase.Add(user);
+                users.Add(user);
+                SaveData.SaveUser(user);
                 return true;
             }
-            else if (!ClientExist(login[0]))
+            else if (!ClientExist(data.User.Login))
             {
-                Client client = new Client()
+                User user = new User()
                 {
-                    Name = login[0],
-                    Password = login[2],
-                    CountBadWord = 0,
-                    Birthday = login[3],
+                    Login = data.User.Login,
+                    Password = data.User.Password,
+                    Tag = data.User.Tag,
+                    CountBadWord = data.User.CountBadWord,
+                    Birthday = data.User.Birthday,
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
-
-                dataClient.clientsFile.Add(client);
-                clients.Add(client);
-                BinarySaveLoad.SaveClients(dataClient);
+                
+                usersBase.Add(user);
+                users.Add(user);
+                SaveData.SaveUser(user);
                 return true;
             }
-            else if (IdentificationClient(login) && !clients.Exists((x) => x.Name == login[0]))
+            else if (IdentificationClient(data.User) && !users.Exists((x) => x.Login == data.User.Login))
             {
-                Client client = new Client()
+                User user = new User()
                 {
-                    Name = login[0],
-                    Password = login[2],
-                    CountBadWord = 0,
-                    Birthday = login[3],
+                    Login = data.User.Login,
+                    Password = data.User.Password,
+                    Tag = data.User.Tag,
+                    CountBadWord = data.User.CountBadWord,
+                    Birthday = data.User.Birthday,
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
 
-                clients.Add(client);
+                users.Add(user);
                 return true;
             }
             else
             {
-                string[] mess = new string[5];
-                mess[4] = "No";
-                Transfer.SendTCP(socket, new DataMessage() { Array = mess });
+                Message mess = new Message();
+                mess.Answer = "No";
+                Transfer.SendTCP(socket, new DataMessage() { Message = mess });
                 return false;
             }
 
         }
 
-        private static void SendToEveryone(Client client, string[] message)
+        private static void SendToEveryone(User user, Message message)
         {
             lock (lck)
             {
-                foreach (var item in clients)
+                foreach (var item in users)
                 {
-                    Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Array = message }));
+                    Task.Run(() => Transfer.SendTCP(item.ClientTcp, new DataMessage() { Message = message }));
                 }
-                Console.WriteLine($"Message has been sent: {client.Name} and IP: {client.EndPointClient.Address}");
+                Console.WriteLine($"Message has been sent: {user.Login} and IP: {user.EndPointClient.Address}");
             }
         }
 
-        private static bool ClientExist(string name)
+        private static bool ClientExist(string login)
         {
-            foreach (var item in dataClient.clientsFile)
+            foreach (var item in usersBase)
             {
-                if (item.Name == name)
+                if (item.Login == login)
                     return true;
             }
             return false;
         }
 
-        private static bool IdentificationClient(string[] name)
+        private static bool IdentificationClient(User user)
         {
-            foreach (var item in dataClient.clientsFile)
+            foreach (var item in usersBase)
             {
-                if (item.Name == name[0] && item.Password == name[2])
+                if (item.Login == user.Login && item.Password == user.Password)
                     return true;
             }
             return false;

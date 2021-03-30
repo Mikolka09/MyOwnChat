@@ -12,12 +12,13 @@ using System.Net.Sockets;
 using ProtocolsMessages;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using SkinSoft.VisualStyler;
+using Message = ProtocolsMessages.Message;
+
 namespace ClientChat
 {
     public partial class Input : Form
     {
-        public string[] login { get; set; }
+        public User user { get; set; }
         public TcpClient tcp;
 
         public Input()
@@ -30,7 +31,7 @@ namespace ClientChat
         {
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");
-            login = new string[5];
+            user = new User();
             if (!regLog.IsMatch(textBoxLogin.Text))
             {
                 MessageBox.Show("Login entered incorrectly", "Warning",
@@ -38,8 +39,8 @@ namespace ClientChat
                 return;
             }
             else
-                login[0] = textBoxLogin.Text;
-            login[1] = "avtorization";
+                user.Login = textBoxLogin.Text;
+            user.Tag = "avtorization";
             if (!regPass.IsMatch(textBoxPass.Text))
             {
                 MessageBox.Show("Password entered incorrectly", "Warning",
@@ -47,11 +48,13 @@ namespace ClientChat
                 return;
             }
             else
-                login[2] = Hash(textBoxPass.Text);
-            string[] answer = new string[5];
-            Transfer.SendTCP(tcp, new DataMessage() { Array = login });
-            answer = ((DataMessage)Transfer.ReceiveTCP(tcp)).Array; 
-            if (answer[4] == "No")
+                user.Password = Hash(textBoxPass.Text);
+            Message answer = new Message();
+            Transfer.SendTCP(tcp, new DataUser() { User = user });
+            Data data = Transfer.ReceiveTCP(tcp);
+            if(data is DataMessage)
+                answer = ((DataMessage)data).Message;
+            if (answer.Answer == "No")
             {
                 MessageBox.Show("Login or password is not correct, or such a login is already in the chat", "Warning",
                                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -66,10 +69,10 @@ namespace ClientChat
         public string Hash(string password)
         {
             byte[] data = Encoding.Default.GetBytes(password);
-            SHA1 sha = new SHA1CryptoServiceProvider();
-            byte[] result = sha.ComputeHash(data);
-            password = Convert.ToBase64String(result);
-            return password;
+            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            byte[] hash = sha256.ComputeHash(data);
+            string pass = Convert.ToBase64String(hash);
+            return pass;
         }
 
         private void buttonReg_Click(object sender, EventArgs e)
@@ -78,7 +81,7 @@ namespace ClientChat
             Registration reg = new Registration();
             if (reg.ShowDialog(this) == DialogResult.OK)
             {
-                login = reg.login;
+                user = reg.user;
             }
             DialogResult = DialogResult.OK;
             Close();

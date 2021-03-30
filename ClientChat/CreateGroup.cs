@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtocolsMessages;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -45,10 +46,14 @@ namespace ClientChat
             {
                 foreach (ListViewItem item in listViewContacts.Items)
                 {
-                    if (item.Checked)
-                        item.Checked = false;
-                    else
                         item.Checked = true;
+                }
+            }
+            else
+            {
+                foreach (ListViewItem item in listViewContacts.Items)
+                {
+                    item.Checked = false;
                 }
             }
         }

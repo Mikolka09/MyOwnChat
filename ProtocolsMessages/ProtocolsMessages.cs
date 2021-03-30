@@ -19,20 +19,25 @@ namespace ProtocolsMessages
     [Serializable]
     public class DataMessage : Data
     {
-        public string Message { get; set; }
-        public string[] Array { get; set; }
+        public Message Message { get; set; }
+    }
+
+    [Serializable]
+    public class DataContact : Data
+    {
+        public Contact Contact { get; set; }
+    }
+
+    [Serializable]
+    public class DataUser : Data
+    {
+        public User User { get; set; }
     }
 
     [Serializable]
     public class DataFile : Data
     {
         public List<byte[]> FileByte { get; set; }
-    }
-
-    public class DataClient : Data
-    {
-        public string pathFile = @"D:\Users\MIKOLKA\MyOwnChat\MyOwnChat\ProtocolsMessages\bin\Debug\clients.data";
-        public List<Client> clientsFile;
     }
 
     public class Transfer
@@ -45,110 +50,72 @@ namespace ProtocolsMessages
             {
                 formatter.Serialize(client.GetStream(), data);
             }
-            catch { }
+            catch { throw; }
 
         }
 
         public static Data ReceiveTCP(TcpClient client)
         {
             try
-            { 
-            return (Data)formatter.Deserialize(client.GetStream());
+            {
+                return (Data)formatter.Deserialize(client.GetStream());
             }
-            catch(IOException) { throw; }
+            catch (IOException) { throw; }
 
 
         }
     }
 
-    public class BinarySaveLoad
-    {
-        private static BinaryFormatter br = new BinaryFormatter();
-
-        public static void SaveClients(DataClient data)
-        {
-            using (FileStream fs = new FileStream(data.pathFile, FileMode.Create))
-            {
-                br.Serialize(fs, data.clientsFile);
-            }
-        }
-
-        public static void LoadClients(DataClient data)
-        {
-            using (FileStream fs = new FileStream(data.pathFile, FileMode.Open))
-            {
-                var cnt = (List<Client>)br.Deserialize(fs);
-                data.clientsFile = cnt;
-            }
-        }
-    }
 
     [Serializable]
-    public class Client
+    public class User
     {
-        public string Name { get; set; }
+
+        public string Login { get; set; }
+
         public string Password { get; set; }
+
+        public string Tag { get; set; }
+
         public int CountBadWord { get; set; }
+
         public string Birthday { get; set; }
+        public string IPClient { get; set; }
         [NonSerialized]
         public TcpClient ClientTcp;
         [NonSerialized]
         public IPEndPoint EndPointClient;
-
-
-
     }
 
-    public class User
-    {
-        
-        public int Id { get; set; }
-       
-        public string Login { get; set; }
-       
-        public string Password { get; set; }
-       
-        public int CountBadWord { get; set; }
-       
-        public string Birthday { get; set; }
-
-        public TcpClient ClientTcp { get; set; }
-
-        public IPEndPoint EndPointClient { get; set; }
-    }
-
-    
+    [Serializable]
     public class Message
     {
-        
-        public int Id { get; set; }
-        
+
         public string Text { get; set; }
-       
+
         public string Priorety { get; set; }
-        
+
         public string LoginSend { get; set; }
-       
+
         public string LoginReceive { get; set; }
-        
+
         public string Answer { get; set; }
-       
+
         public string Moment { get; set; }
 
     }
 
-    
+    [Serializable]
     public class Contact
     {
-        
-        public int Id { get; set; }
-        
         public string Login { get; set; }
-        
+
+        public string LoginAdd { get; set; }
+
         public string Name { get; set; }
-        
+
         public string Tag { get; set; }
-       
+
         public Color Color { get; set; }
     }
 

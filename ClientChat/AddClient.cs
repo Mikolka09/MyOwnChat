@@ -12,13 +12,14 @@ using System.Net.Sockets;
 using ProtocolsMessages;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using Message = ProtocolsMessages.Message;
 
 namespace ClientChat
 {
     public partial class AddClient : Form
     {
-        public Client client { get; set; }
-        public string[] login { get; set; }
+        public User client { get; set; }
+        public User user { get; set; }
         private TcpClient tcp;
 
         public AddClient()
@@ -37,10 +38,10 @@ namespace ClientChat
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");
 
-            if (client.Name == null)
+            if (client.Login == null)
             {
                 tcp = (Owner as Form1).socket;
-                login = new string[5];
+                user = new User();
                 bool res = true;
                 while (res)
                 {
@@ -51,8 +52,8 @@ namespace ClientChat
                         return;
                     }
                     else
-                        login[0] = textBoxLogin.Text;
-                    login[1] = "create";
+                        user.Login = textBoxLogin.Text;
+                    user.Tag = "create";
                     if (!regPass.IsMatch(textBoxPass.Text))
                     {
                         MessageBox.Show("Password entered incorrectly", "Warning",
@@ -68,14 +69,16 @@ namespace ClientChat
                             textBoxPass.Clear();
                             textBoxRepeat.Clear();
                         }
-                        login[2] = Hash(textBoxPass.Text);
+                        user.Password = Hash(textBoxPass.Text);
                     }
-                    login[3] = dateTimePickerBirthday.Value.ToShortDateString();
+                    user.Birthday = dateTimePickerBirthday.Value.ToShortDateString();
 
-                    string[] answer = new string[5];
-                    Transfer.SendTCP(tcp, new DataMessage() { Array = login });
-                    answer = ((DataMessage)Transfer.ReceiveTCP(tcp)).Array;
-                    if (answer[4] == "No")
+                    Message answer = new Message();
+                    Transfer.SendTCP(tcp, new DataUser() { User = user });
+                    Data data = Transfer.ReceiveTCP(tcp);
+                    if (data is DataMessage)
+                        answer = ((DataMessage)data).Message;
+                    if (answer.Answer == "No")
                     {
                         MessageBox.Show("There is such a Login. Please enter a different Login", "Warning",
                                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -99,8 +102,8 @@ namespace ClientChat
                     return;
                 }
                 else
-                    client.Name = textBoxLogin.Text;
-                if(client.Name == "Admin")
+                    client.Login = textBoxLogin.Text;
+                if(client.Login == "Admin")
                 {
                     if (!regPass.IsMatch(textBoxPass.Text))
                     {
@@ -130,20 +133,20 @@ namespace ClientChat
         public string Hash(string password)
         {
             byte[] data = Encoding.Default.GetBytes(password);
-            SHA1 sha = new SHA1CryptoServiceProvider();
-            byte[] result = sha.ComputeHash(data);
-            password = Convert.ToBase64String(result);
-            return password;
+            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            byte[] hash = sha256.ComputeHash(data);
+            string pass = Convert.ToBase64String(hash);
+            return pass;
         }
 
         private void AddClient_Load(object sender, EventArgs e)
         {
-            client = new Client();
+            client = new User();
             client = (Owner as Form1).client;
-            if (client.Name != null)
+            if (client.Login != null)
             {
-                textBoxLogin.Text = client.Name;
-                if(client.Name == "Admin")
+                textBoxLogin.Text = client.Login;
+                if(client.Login == "Admin")
                 {
                     textBoxPass.Enabled = true;
                     textBoxRepeat.Enabled = true;

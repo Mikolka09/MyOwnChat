@@ -30,50 +30,126 @@ namespace DataBaseProtocol
         public static DataBase dataBase = new DataBase(ConfigurationManager.ConnectionStrings["DB"].ConnectionString);
         public static void SaveUser(User user)
         {
-            dataBase.Users.InsertOnSubmit(
-                new UserB
-                {
-                    Login = user.Login,
-                    Password = user.Password,
-                    CountBadWord = user.CountBadWord,
-                    Birthday = user.Birthday
-                });
+            try
+            {
+                dataBase.Users.InsertOnSubmit(
+                                new UserB
+                                {
+                                    Login = user.Login,
+                                    Password = user.Password,
+                                    Tag = user.Tag,
+                                    CountBadWord = user.CountBadWord,
+                                    Birthday = user.Birthday,
+                                    IPClient = user.EndPointClient.Address.ToString()
+                                });
+                dataBase.SubmitChanges();
+            }
+            catch { }
+
+        }
+
+        public static void SaveUsers(List<User> users)
+        {
+            foreach (var item in users)
+            {
+                dataBase.Users.InsertOnSubmit
+                    (
+                       new UserB
+                       {
+                           Login = item.Login,
+                           Password = item.Password,
+                           Tag = item.Tag,
+                           CountBadWord = item.CountBadWord,
+                           Birthday = item.Birthday,
+                           IPClient = item.EndPointClient.Address.ToString()
+                       });
+            }
             dataBase.SubmitChanges();
+        }
+
+        public static void SaveListUser(List<User> users)
+        {
+            var list = from U in dataBase.Users
+                       select U;
+            if (list.ToList().Count != 0)
+            {
+                dataBase.Users.DeleteAllOnSubmit(list);
+                dataBase.SubmitChanges();
+
+                SaveUsers(users);
+            }
+            else
+            {
+                SaveUsers(users);
+            }
+
+
         }
 
         public static void SaveMessage(Message message)
         {
-            var queryS = dataBase.Users.Where(c => c.Login == message.LoginSend).Select((d) => d.Id);
+            var queryS = dataBase.Users.Where(c => c.Login == message.LoginSend).Select((d) => d.Id).ToList();
 
-            var queryR = dataBase.Users.Where(c => c.Login == message.LoginReceive).Select((d) => d.Id);
+            var queryR = dataBase.Users.Where(c => c.Login == message.LoginReceive).Select((d) => d.Id).ToList();
+            int id = 0;
+            if (queryR.Count == 0)
+                id = 0;
+            else
+                id = queryR[0];
 
+            try
+            {
+                dataBase.Messages.InsertOnSubmit(
+                                new MessageB
+                                {
+                                    Text = message.Text,
+                                    Priorety = message.Priorety,
+                                    IdSend = queryS[0],
+                                    IdReceive = id,
+                                    Answer = message.Answer,
+                                    Moment = Convert.ToDateTime(message.Moment)
+                                });
+                dataBase.SubmitChanges();
+            }
+            catch { }
+        }
 
-            dataBase.Messages.InsertOnSubmit(
-                new MessageB
-                {
-                    Text = message.Text,
-                    Priorety = message.Priorety,
-                    IdSend = Convert.ToInt32(queryS.ToString()),
-                    IdReceive = Convert.ToInt32(queryR.ToString()),
-                    Answer = message.Answer,
-                    Moment = Convert.ToDateTime(message.Moment)
-                });
+        public static void SaveContacts(List<Contact> contacts)
+        {
+            foreach (var item in contacts)
+            {
+                var queryL = dataBase.Users.Where(c => c.Login == item.Login).Select((d) => d.Id).ToList();
+                var queryA = dataBase.Users.Where(c => c.Login == item.LoginAdd).Select((d) => d.Id).ToList();
+
+                dataBase.Contacts.InsertOnSubmit(
+                    new ContactB
+                    {
+                        IdLogin = queryL[0],
+                        IdLoginAdd = queryA[0],
+                        Name = item.Name,
+                        Tag = item.Tag,
+                        Color = item.Color
+                    });
+            }
             dataBase.SubmitChanges();
         }
 
-        public static void SaveContact(Contact contact)
+        public static void SaveContact(List<Contact> contacts)
         {
-            var query = dataBase.Users.Where(c => c.Login == contact.Login).Select((d) => d.Id);
+            var cont = from C in dataBase.Contacts
+                       select C;
+            if(cont.ToList().Count != 0)
+            {
+                dataBase.Contacts.DeleteAllOnSubmit(cont);
+                dataBase.SubmitChanges();
 
-            dataBase.Contacts.InsertOnSubmit(
-                new ContactB
-                {
-                    IdLogin = Convert.ToInt32(query.ToString()),
-                    Name = contact.Name,
-                    Tag = contact.Tag,
-                    Color = contact.Color
-                });
-            dataBase.SubmitChanges();
+                SaveContacts(contacts);
+            }
+            else 
+            {
+                SaveContacts(contacts);
+            }
+            
         }
     }
 
@@ -81,26 +157,29 @@ namespace DataBaseProtocol
     {
         public static DataBase dataBase = new DataBase(ConfigurationManager.ConnectionStrings["DB"].ConnectionString);
 
-        public static Datas LoadUser()
+        public static List<User> LoadUser()
         {
             DataList data = new DataList();
             data.Users = new List<User>();
 
             var query = from U in dataBase.Users
                         select U;
+
             foreach (var item in query)
             {
                 User user = new User();
                 user.Login = item.Login;
                 user.Password = item.Password;
+                user.Tag = item.Tag;
                 user.CountBadWord = item.CountBadWord;
                 user.Birthday = item.Birthday;
+                user.IPClient = item.IPClient;
                 data.Users.Add(user);
             }
-            return data;
+            return data.Users;
         }
 
-        public static Datas LoadMessage()
+        public static List<Message> LoadMessage()
         {
             DataList data = new DataList();
             data.Messages = new List<Message>();
@@ -108,8 +187,15 @@ namespace DataBaseProtocol
             var query = from M in dataBase.Messages
                         join US in dataBase.Users on M.IdSend equals US.Id
                         join UR in dataBase.Users on M.IdReceive equals UR.Id
-                        select new MixedMess { Text = M.Text, Priorety = M.Priorety, LoginSend = US.Login, LoginReceive = UR.Login,
-                        Answer = M.Answer, Moment = M.Moment.ToLongTimeString()};
+                        select new MixedMess
+                        {
+                            Text = M.Text,
+                            Priorety = M.Priorety,
+                            LoginSend = US.Login,
+                            LoginReceive = UR.Login,
+                            Answer = M.Answer,
+                            Moment = M.Moment.ToLongTimeString()
+                        };
             foreach (var item in query)
             {
                 Message mess = new Message();
@@ -121,34 +207,49 @@ namespace DataBaseProtocol
                 mess.Moment = item.Moment;
                 data.Messages.Add(mess);
             }
-            return data;
+            return data.Messages;
         }
 
-        public static Datas LoadContact()
+        public static List<Contact> LoadContact()
         {
             DataList data = new DataList();
             data.Contacts = new List<Contact>();
 
             var query = from C in dataBase.Contacts
-                        join U in dataBase.Users on C.IdLogin equals U.Id
-                        select new { U.Login, C.Name, C.Tag, C.Color};
+                        join U1 in dataBase.Users on C.IdLogin equals U1.Id
+                        join U2 in dataBase.Users on C.IdLoginAdd equals U2.Id
+                        select new MixedCont { Login = U1.Login, LoginAdd = U2.Login, Name = C.Name, Tag = C.Tag, Color = C.Color };
             foreach (var item in query)
             {
                 Contact contact = new Contact();
                 contact.Login = item.Login;
+                contact.LoginAdd = item.LoginAdd;
                 contact.Name = item.Name;
                 contact.Tag = item.Tag;
                 contact.Color = item.Color;
                 data.Contacts.Add(contact);
             }
-            return data;
+            return data.Contacts;
         }
 
     }
 
+    public class MixedCont
+    {
+        public string Login { get; set; }
+
+        public string LoginAdd { get; set; }
+
+        public string Name { get; set; }
+
+        public string Tag { get; set; }
+
+        public Color Color { get; set; }
+    }
+
     public class MixedMess
     {
-       
+
         public string Text { get; set; }
 
         public string Priorety { get; set; }
@@ -171,14 +272,15 @@ namespace DataBaseProtocol
         public string Login { get; set; }
         [Column(Name = "password")]
         public string Password { get; set; }
+        [Column(Name = "tag")]
+        public string Tag { get; set; }
         [Column(Name = "count_bad_word")]
         public int CountBadWord { get; set; }
         [Column(Name = "birthday")]
         public string Birthday { get; set; }
+        [Column(Name = "ip_client")]
+        public string IPClient;
 
-        public TcpClient ClientTcp { get; set; }
-
-        public IPEndPoint EndPointClient { get; set; }
     }
 
     [Table(Name = "Message")]
@@ -208,6 +310,8 @@ namespace DataBaseProtocol
         public int Id { get; set; }
         [Column(Name = "id_login")]
         public int IdLogin { get; set; }
+        [Column(Name = "id_loginAdd")]
+        public int IdLoginAdd { get; set; }
         [Column(Name = "name")]
         public string Name { get; set; }
         [Column(Name = "tag")]

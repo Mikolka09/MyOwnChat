@@ -22,7 +22,7 @@ namespace ClientChat
         private void PrivateMessage_Load(object sender, EventArgs e)
         {
             message = "";
-            string log = (Owner as Form1).message[3];
+            string log = (Owner as Form1).message.LoginReceive;
             this.Text = $"PRIVATE MESSAGE FROM: {log}";
             textBoxMessage.Clear();
             buttonSend.Enabled = false;

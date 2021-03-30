@@ -46,7 +46,7 @@ namespace ClientChat
                 }
                 else
                     user.Login = textBoxLogin.Text;
-                user.Tag = "avtorization";
+                user.Tag = "registration";
                 if (!regPass.IsMatch(textBoxPass.Text))
                 {
                     MessageBox.Show("Password entered incorrectly", "Warning",

@@ -15,6 +15,7 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 using DataBaseProtocol;
+using System.Data.SqlClient;
 using Message = ProtocolsMessages.Message;
 
 namespace ClientChat
@@ -44,7 +45,7 @@ namespace ClientChat
         public User client;
         public List<string> contCheck;
         public string nameGroup;
-        public DataBase baseData;
+        
 
 
 
@@ -250,6 +251,7 @@ namespace ClientChat
                         if (user.Login == "Admin")
                         {
                             usersBase = new List<User>();
+                            usersBase = LoadData.LoadUser();
                             listViewContacts.Visible = false;
                             listViewClients.Visible = true;
                             groupBox2.Text = "CONTACTS CLIENTS";

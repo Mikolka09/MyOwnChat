@@ -50,7 +50,7 @@ namespace ProtocolsMessages
             {
                 formatter.Serialize(client.GetStream(), data);
             }
-            catch { throw; }
+            catch { }
 
         }
 

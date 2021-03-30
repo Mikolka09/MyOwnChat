@@ -147,6 +147,10 @@
       <Project>{b064d644-16b8-42d7-b6c1-e76054fcdee5}</Project>
       <Name>DataBaseProtocol</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyOwnChat\MyOwnChat.csproj">
+      <Project>{a0df956c-bc90-49bf-8936-977fe9485fe0}</Project>
+      <Name>MyOwnChat</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ProtocolsMessages\ProtocolsMessages.csproj">
       <Project>{dd73e6da-27f1-4c0b-99da-470fa724a8af}</Project>
       <Name>ProtocolsMessages</Name>

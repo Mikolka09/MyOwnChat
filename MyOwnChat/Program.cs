@@ -16,7 +16,7 @@ using System.Data.Linq.Mapping;
 namespace MyOwnChat
 {
 
-    class Program
+     class Program
     {
         private static IPAddress iP;
         private static IPEndPoint endPoint;
@@ -121,6 +121,28 @@ namespace MyOwnChat
             switch (messCheck)
             {
                 case "avtorization":
+
+                    if (!IdentificationClient(((DataUser)data).User))
+                    {
+                        Message mess = new Message();
+                        mess.Answer = "No";
+                        Transfer.SendTCP(socket, new DataMessage() { Message = mess });
+                    }
+                    else if (LoginCheck(socket, (DataUser)data))
+                    {
+                        user = users[users.FindIndex((x) => x.Login == ((DataUser)data).User.Login)];
+                        Console.WriteLine($"Client connected with Name: {user.Login} and IP: {user.EndPointClient.Address}");
+                        messEveryone.Text = $"{user.Login} joined to chat";
+                        messEveryone.Moment = DateTime.Now.ToLongTimeString();
+                        messEveryone.LoginSend = user.Login;
+                        messEveryone.Priorety = "avtorization";
+                        messEveryone.LoginReceive = "";
+                        messEveryone.Answer = "";
+                        SaveData.SaveMessage(messEveryone);
+                        SendToEveryone(user, messEveryone);
+                    }
+                    break;
+                case "registration":
                     if (LoginCheck(socket, (DataUser)data))
                     {
                         user = users[users.FindIndex((x) => x.Login == ((DataUser)data).User.Login)];
@@ -325,7 +347,7 @@ namespace MyOwnChat
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
-                
+
                 usersBase.Add(user);
                 users.Add(user);
                 SaveData.SaveUser(user);
@@ -343,7 +365,7 @@ namespace MyOwnChat
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint
                 };
-                
+
                 usersBase.Add(user);
                 users.Add(user);
                 SaveData.SaveUser(user);

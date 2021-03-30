@@ -13,6 +13,7 @@ using ProtocolsMessages;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Message = ProtocolsMessages.Message;
+using DataBaseProtocol;
 
 namespace ClientChat
 {
@@ -20,18 +21,20 @@ namespace ClientChat
     {
         public User user { get; set; }
         public TcpClient tcp;
+       
 
         public Input()
         {
             InitializeComponent();
-           
+
         }
-            
+
         private void buttonOK_Click(object sender, EventArgs e)
         {
             Regex regLog = new Regex("^[A-ZА-Я]{1}\\S{1,8}$");
             Regex regPass = new Regex("^\\S{1,8}$");
             user = new User();
+           
             if (!regLog.IsMatch(textBoxLogin.Text))
             {
                 MessageBox.Show("Login entered incorrectly", "Warning",
@@ -52,7 +55,7 @@ namespace ClientChat
             Message answer = new Message();
             Transfer.SendTCP(tcp, new DataUser() { User = user });
             Data data = Transfer.ReceiveTCP(tcp);
-            if(data is DataMessage)
+            if (data is DataMessage)
                 answer = ((DataMessage)data).Message;
             if (answer.Answer == "No")
             {

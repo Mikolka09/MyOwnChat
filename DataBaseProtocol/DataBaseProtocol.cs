@@ -11,7 +11,7 @@ using System.Net;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using ProtocolsMessages;
-
+using System.Data.Entity;
 
 namespace DataBaseProtocol
 {
@@ -40,7 +40,7 @@ namespace DataBaseProtocol
                                     Tag = user.Tag,
                                     CountBadWord = user.CountBadWord,
                                     Birthday = user.Birthday,
-                                    IPClient = user.EndPointClient.Address.ToString()
+                                    IPClient = user.IPClient
                                 });
                 dataBase.SubmitChanges();
             }
@@ -48,23 +48,31 @@ namespace DataBaseProtocol
 
         }
 
+
         public static void SaveUsers(List<User> users)
         {
-            foreach (var item in users)
+            try
             {
-                dataBase.Users.InsertOnSubmit
-                    (
-                       new UserB
-                       {
-                           Login = item.Login,
-                           Password = item.Password,
-                           Tag = item.Tag,
-                           CountBadWord = item.CountBadWord,
-                           Birthday = item.Birthday,
-                           IPClient = item.EndPointClient.Address.ToString()
-                       });
+                foreach (var item in users)
+                {
+                    UserB user = new UserB();
+
+                    user.Login = item.Login;
+                    user.Password = item.Password;
+                    user.Tag = item.Tag;
+                    user.CountBadWord = item.CountBadWord;
+                    user.Birthday = item.Birthday;
+                    user.IPClient = item.IPClient;
+
+                    dataBase.Users.InsertOnSubmit(user);
+                    dataBase.SubmitChanges();
+                }
             }
-            dataBase.SubmitChanges();
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
 
         public static void SaveListUser(List<User> users)
@@ -74,16 +82,15 @@ namespace DataBaseProtocol
             if (list.ToList().Count != 0)
             {
                 dataBase.Users.DeleteAllOnSubmit(list);
+                dataBase.ExecuteCommand(@"DELETE FROM [User]
+                                          DBCC CHECKIDENT('User', RESEED, 0)");
                 dataBase.SubmitChanges();
-
                 SaveUsers(users);
             }
             else
             {
                 SaveUsers(users);
             }
-
-
         }
 
         public static void SaveMessage(Message message)
@@ -114,42 +121,71 @@ namespace DataBaseProtocol
             catch { }
         }
 
+        public static void SaveListContacts(List<Contact> contacts)
+        {
+            try
+            {
+                foreach (var item in contacts)
+                {
+                    var queryL = dataBase.Users.Where(c => c.Login == item.Login).Select((d) => d.Id).ToList();
+                    var queryA = dataBase.Users.Where(c => c.Login == item.LoginAdd).Select((d) => d.Id).ToList();
+
+
+                    ContactB cont = new ContactB();
+
+                    cont.IdLogin = queryL[0];
+                    cont.IdLoginAdd = queryA[0];
+                    cont.Name = item.Name;
+                    cont.Tag = item.Tag;
+                    cont.Color = item.Color.ToString();
+                    dataBase.Contacts.InsertOnSubmit(cont);
+                }
+                dataBase.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+        }
+
+
+
         public static void SaveContacts(List<Contact> contacts)
         {
-            foreach (var item in contacts)
+            var list = from C in dataBase.Contacts
+                       select C;
+            if (list.ToList().Count == 0)
             {
-                var queryL = dataBase.Users.Where(c => c.Login == item.Login).Select((d) => d.Id).ToList();
-                var queryA = dataBase.Users.Where(c => c.Login == item.LoginAdd).Select((d) => d.Id).ToList();
-
-                dataBase.Contacts.InsertOnSubmit(
-                    new ContactB
-                    {
-                        IdLogin = queryL[0],
-                        IdLoginAdd = queryA[0],
-                        Name = item.Name,
-                        Tag = item.Tag,
-                        Color = item.Color
-                    });
+                SaveListContacts(contacts);
             }
-            dataBase.SubmitChanges();
+            else
+            {
+                dataBase.Contacts.DeleteAllOnSubmit(list);
+                dataBase.ExecuteCommand(@"DELETE FROM [Contact]
+                                          DBCC CHECKIDENT('Contact', RESEED, 0)");
+                dataBase.SubmitChanges();
+                SaveListContacts(contacts);
+            }
+
         }
 
         public static void SaveContact(List<Contact> contacts)
         {
             var cont = from C in dataBase.Contacts
                        select C;
-            if(cont.ToList().Count != 0)
+            if (cont.ToList().Count != 0)
             {
                 dataBase.Contacts.DeleteAllOnSubmit(cont);
                 dataBase.SubmitChanges();
 
                 SaveContacts(contacts);
             }
-            else 
+            else
             {
                 SaveContacts(contacts);
             }
-            
+
         }
     }
 
@@ -226,7 +262,7 @@ namespace DataBaseProtocol
                 contact.LoginAdd = item.LoginAdd;
                 contact.Name = item.Name;
                 contact.Tag = item.Tag;
-                contact.Color = item.Color;
+                contact.Color = Color.FromName(item.Color);
                 data.Contacts.Add(contact);
             }
             return data.Contacts;
@@ -244,7 +280,7 @@ namespace DataBaseProtocol
 
         public string Tag { get; set; }
 
-        public Color Color { get; set; }
+        public string Color { get; set; }
     }
 
     public class MixedMess
@@ -317,7 +353,7 @@ namespace DataBaseProtocol
         [Column(Name = "tag")]
         public string Tag { get; set; }
         [Column(Name = "color")]
-        public Color Color { get; set; }
+        public string Color { get; set; }
     }
 
     public class DataBase : DataContext

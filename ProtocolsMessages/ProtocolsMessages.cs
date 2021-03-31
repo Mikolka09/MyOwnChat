@@ -35,6 +35,18 @@ namespace ProtocolsMessages
     }
 
     [Serializable]
+    public class DataUsers : Data
+    {
+        public List<User> ListU { get; set; }
+    }
+
+    [Serializable]
+    public class DataContacts : Data
+    {
+        public List<Contact> ListC { get; set; }
+    }
+
+    [Serializable]
     public class DataFile : Data
     {
         public List<byte[]> FileByte { get; set; }

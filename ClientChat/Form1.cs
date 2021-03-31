@@ -14,9 +14,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
-using DataBaseProtocol;
-using System.Data.SqlClient;
 using Message = ProtocolsMessages.Message;
+using MyOwnChat;
 
 namespace ClientChat
 {
@@ -41,11 +40,15 @@ namespace ClientChat
         private string exp;
         private string tagMessage;
         private List<byte[]> fileByte;
-        private List<User> usersBase;
+        private List<byte[]> contByte;
+        private List<byte[]> listByte;
+        public List<User> usersB;
         public User client;
         public List<string> contCheck;
         public string nameGroup;
-        
+
+
+
 
 
 
@@ -250,8 +253,9 @@ namespace ClientChat
                         user = inp.user;
                         if (user.Login == "Admin")
                         {
-                            usersBase = new List<User>();
-                            usersBase = LoadData.LoadUser();
+                            listByte = new List<byte[]>();
+                            usersB = new List<User>();
+                            usersB = ReceiveUsers();
                             listViewContacts.Visible = false;
                             listViewClients.Visible = true;
                             groupBox2.Text = "CONTACTS CLIENTS";
@@ -264,7 +268,9 @@ namespace ClientChat
                         }
                         message = new Message();
                         contacts = new List<Contact>();
+                        contacts = ReceiveContacts();
                         tempContacts = new List<Contact>();
+                        contByte = new List<byte[]>();
                         fileByte = new List<byte[]>();
                         message.Priorety = "other";
                         message.LoginSend = user.Login;
@@ -292,6 +298,40 @@ namespace ClientChat
             catch { }
         }
 
+        public List<User> ReceiveUsers()
+        {
+            Message mess = new Message();
+            mess.Text = "";
+            mess.Priorety = "loadUsers";
+            mess.LoginSend = user.Login;
+            mess.LoginReceive = user.Login;
+            mess.Moment = DateTime.Now.ToLongTimeString();
+            mess.Answer = "";
+            Transfer.SendTCP(socket, new DataMessage() { Message = mess });
+            Data data = Transfer.ReceiveTCP(socket);
+            if (data is DataUsers)
+                return ((DataUsers)data).ListU;
+            else
+                return null;
+        }
+
+        public List<Contact> ReceiveContacts()
+        {
+            Message mess = new Message();
+            mess.Text = "";
+            mess.Priorety = "loadContacts";
+            mess.LoginSend = user.Login;
+            mess.LoginReceive = user.Login;
+            mess.Moment = DateTime.Now.ToLongTimeString();
+            mess.Answer = "";
+            Transfer.SendTCP(socket, new DataMessage() { Message = mess });
+            Data data = Transfer.ReceiveTCP(socket);
+            if (data is DataContacts)
+                return ((DataContacts)data).ListC;
+            else
+                return null;
+        }
+
         public void buttonSend_Click(object sender, EventArgs e)
         {
             try
@@ -308,6 +348,8 @@ namespace ClientChat
         {
             if (socket.Connected)
             {
+                if (message == null)
+                    message = new Message();
                 message.Text = "";
                 message.Priorety = "exit";
                 message.Answer = "";
@@ -356,7 +398,7 @@ namespace ClientChat
         private void AddToListViewClients()
         {
             listViewClients.Items.Clear();
-            foreach (var item in usersBase)
+            foreach (var item in usersB)
             {
                 ListViewItem it = new ListViewItem(item.Login);
                 it.SubItems.Add(item.CountBadWord.ToString());
@@ -377,6 +419,7 @@ namespace ClientChat
             else
                 Cont.Login = str[0];
             Cont.Color = tempContacts[tempContacts.FindIndex((x) => x.Login == Cont.Login)].Color;
+            Cont.LoginAdd = user.Login;
             EditContact editContact = new EditContact();
             if (editContact.ShowDialog(this) == DialogResult.OK)
             {
@@ -397,6 +440,16 @@ namespace ClientChat
             AddToListViewContacts();
         }
 
+        public void SaveUsers(List<User> users)
+        {
+            Transfer.SendTCP(socket, new DataUsers() { ListU = users });
+        }
+
+        public void SaveContacts(List<Contact> list)
+        {
+            Transfer.SendTCP(socket, new DataContacts() { ListC = list });
+        }
+
         private void buttonSaveContacts_Click(object sender, EventArgs e)
         {
             if (user.Login == "Admin")
@@ -406,24 +459,24 @@ namespace ClientChat
                 {
                     User client = new User();
                     client.Login = item.SubItems[0].Text;
-                    client.Password = usersBase[usersBase.FindIndex((x) => x.Login == client.Login)].Password;
+                    client.Password = usersB[usersB.FindIndex((x) => x.Login == client.Login)].Password;
                     client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
                     client.Birthday = item.SubItems[2].Text;
-                    client.Tag = usersBase[usersBase.FindIndex((x) => x.Login == client.Login)].Tag;
-                    client.IPClient = usersBase[usersBase.FindIndex((x) => x.Login == client.Login)].IPClient;
+                    client.Tag = usersB[usersB.FindIndex((x) => x.Login == client.Login)].Tag;
+                    client.IPClient = usersB[usersB.FindIndex((x) => x.Login == client.Login)].IPClient;
                     newList.Add(client);
                 }
-                usersBase.Clear();
+                usersB.Clear();
                 foreach (var item in newList)
                 {
-                    usersBase.Add(item);
+                    usersB.Add(item);
                 }
-                SaveData.SaveListUser(usersBase);
+                SaveUsers(usersB);
                 MessageBox.Show("Clients Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                SaveData.SaveContact(contacts);
+                SaveContacts(contacts);
                 MessageBox.Show("Contacts Saved!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -431,13 +484,11 @@ namespace ClientChat
         private void buttonLoadContacts_Click(object sender, EventArgs e)
         {
             if (user.Login == "Admin")
-            {
-                usersBase = LoadData.LoadUser();
+            { 
                 AddToListViewClients();
             }
             else
             {
-                contacts = LoadData.LoadContact();
                 AddToListViewContacts();
             }
         }
@@ -448,24 +499,24 @@ namespace ClientChat
             {
                 if (e.Column == 0 && sort == true)
                 {
-                    usersBase.Sort(new LogClComparer());
+                    usersB.Sort(new LogClComparer());
                     sort = false;
                 }
                 else if (e.Column == 0 && sort == false)
                 {
-                    usersBase.Sort(new LogClComparer());
-                    usersBase.Reverse();
+                    usersB.Sort(new LogClComparer());
+                    usersB.Reverse();
                     sort = true;
                 }
                 if (e.Column == 1 && sort == true)
                 {
-                    usersBase.Sort(new CountClComparer());
+                    usersB.Sort(new CountClComparer());
                     sort = false;
                 }
                 else if (e.Column == 1 && sort == false)
                 {
-                    usersBase.Sort(new CountClComparer());
-                    usersBase.Reverse();
+                    usersB.Sort(new CountClComparer());
+                    usersB.Reverse();
                     sort = true;
                 }
                 AddToListViewClients();
@@ -513,15 +564,17 @@ namespace ClientChat
                     string name = client.Login;
                     client.CountBadWord = Convert.ToInt32(item.SubItems[1].Text);
                     client.Birthday = item.SubItems[2].Text; ;
-                    client.Password = usersBase[usersBase.FindIndex((x) => x.Login == client.Login)].Password;
+                    client.Password = usersB[usersB.FindIndex((x) => x.Login == client.Login)].Password;
+                    client.Tag = usersB[usersB.FindIndex((x) => x.Login == client.Login)].Tag;
+                    client.IPClient = usersB[usersB.FindIndex((x) => x.Login == client.Login)].IPClient;
                     if (edit.ShowDialog(this) == DialogResult.OK)
                     {
                         client = edit.client;
                         if (client.Login != name)
                         {
-                            if (!usersBase.Exists((x) => x.Login == client.Login))
+                            if (!usersB.Exists((x) => x.Login == client.Login))
                             {
-                                k = usersBase.FindIndex((x) => x.Login == client.Login);
+                                k = usersB.FindIndex((x) => x.Login == client.Login);
                                 res = false;
                             }
                             else
@@ -533,13 +586,15 @@ namespace ClientChat
                         }
                         else
                         {
-                            k = usersBase.FindIndex((x) => x.Login == client.Login);
+                            k = usersB.FindIndex((x) => x.Login == client.Login);
                             res = false;
                         }
                     }
+                    else
+                        res = false;
                 }
-                usersBase.RemoveAt(k);
-                usersBase.Add(client);
+                usersB.RemoveAt(k);
+                usersB.Add(client);
                 AddToListViewClients();
                 MessageBox.Show("Client Edited!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -551,6 +606,7 @@ namespace ClientChat
                 Cont.Name = it.SubItems[1].Text;
                 Cont.Tag = it.SubItems[2].Text;
                 Cont.Color = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].Color;
+                Cont.LoginAdd = contacts[contacts.FindIndex((x) => x.Login == Cont.Login)].LoginAdd;
                 EditContact ed = new EditContact();
                 if (ed.ShowDialog(this) == DialogResult.OK)
                 {
@@ -572,8 +628,8 @@ namespace ClientChat
                 client = new User();
                 ListViewItem it = listViewClients.SelectedItems[0];
                 client.Login = it.SubItems[0].Text;
-                int k = usersBase.FindIndex((x) => x.Login == client.Login);
-                usersBase.RemoveAt(k);
+                int k = usersB.FindIndex((x) => x.Login == client.Login);
+                usersB.RemoveAt(k);
                 AddToListViewClients();
                 MessageBox.Show("Client Deleted!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -604,7 +660,9 @@ namespace ClientChat
                     client.Password = user.Password;
                     client.CountBadWord = 0;
                     client.Birthday = user.Birthday;
-                    usersBase.Add(client);
+                    client.Tag = "";
+                    client.IPClient = "";
+                    usersB.Add(client);
                     AddToListViewClients();
                     MessageBox.Show("Client Addet!", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -613,6 +671,7 @@ namespace ClientChat
             {
                 Cont = new Contact();
                 Cont.Login = "";
+                Cont.LoginAdd = user.Login;
                 Cont.Name = "";
                 Cont.Tag = "";
                 Cont.Color = RandColor();

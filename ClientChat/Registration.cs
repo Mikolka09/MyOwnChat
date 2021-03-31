@@ -65,7 +65,6 @@ namespace ClientChat
                     user.Password = Hash(textBoxPass.Text);
                 }
                 user.Birthday = dateTimePickerBirthday.Value.ToShortDateString();
-
                 Message answer = new Message();
                 Transfer.SendTCP(tcp, new DataUser() { User = user });
                 Data data = Transfer.ReceiveTCP(tcp);

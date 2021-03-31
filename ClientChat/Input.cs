@@ -13,7 +13,7 @@ using ProtocolsMessages;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Message = ProtocolsMessages.Message;
-using DataBaseProtocol;
+
 
 namespace ClientChat
 {
@@ -85,8 +85,12 @@ namespace ClientChat
             if (reg.ShowDialog(this) == DialogResult.OK)
             {
                 user = reg.user;
+                DialogResult = DialogResult.OK;
             }
-            DialogResult = DialogResult.OK;
+            else
+            {
+                DialogResult = DialogResult.None;
+            }  
             Close();
         }
 

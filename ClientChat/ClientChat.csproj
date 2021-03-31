@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="SkinSoft.VisualStyler, Version=2.4.0.0, Culture=neutral, PublicKeyToken=0fda9f423e1d9830, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
@@ -143,10 +144,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataBaseProtocol\DataBaseProtocol.csproj">
-      <Project>{b064d644-16b8-42d7-b6c1-e76054fcdee5}</Project>
-      <Name>DataBaseProtocol</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MyOwnChat\MyOwnChat.csproj">
       <Project>{a0df956c-bc90-49bf-8936-977fe9485fe0}</Project>
       <Name>MyOwnChat</Name>

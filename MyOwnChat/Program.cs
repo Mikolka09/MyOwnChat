@@ -25,6 +25,7 @@ namespace MyOwnChat
         private static List<User> users;
         public static List<User> usersBase;
         public static List<Contact> contactsBase;
+        public static List<Message> messages;
         private static object lck;
         private static CancellationTokenSource tokenStop;
         private static Message messEveryone;
@@ -37,6 +38,8 @@ namespace MyOwnChat
             endPoint = new IPEndPoint(iP, port);
             server = new TcpListener(endPoint);
             contactsBase = new List<Contact>();
+            messages = new List<Message>();
+            messages = LoadData.LoadMessage();
             contactsBase = LoadData.LoadContact();
             users = new List<User>();
             usersBase = new List<User>();
@@ -113,11 +116,11 @@ namespace MyOwnChat
                     if (EqualsContact(item, it))
                         count++;
                 }
-                if(count==0)
+                if (count == 0)
                     contactsBase.Add(item);
                 else
                     count = 0;
-            } 
+            }
             SaveData.SaveContacts(contactsBase);
         }
 
@@ -129,6 +132,11 @@ namespace MyOwnChat
                 usersBase.Add(item);
             }
             SaveData.SaveListUser(usersBase);
+        }
+
+        public static void SaveUsers(List<User> list)
+        {
+            SaveData.SaveListUser(list);
         }
 
         public static int CountOneWord(string txt, string reg)
@@ -212,6 +220,22 @@ namespace MyOwnChat
                         Transfer.SendTCP(user.ClientTcp, new DataUsers() { ListU = list });
                         break;
                     }
+                case "statistic":
+                    {
+                        user = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
+                        List<Message> list = new List<Message>();
+                        foreach (var item in messages)
+                        {
+                            if (item.LoginReceive == "0" && item.Answer == "")
+                            {
+                                item.Answer = "no answer";
+                                item.LoginReceive = "other";
+                                list.Add(item);
+                            }
+                        }
+                            Transfer.SendTCP(user.ClientTcp, new DataMessages() { ListM = list });
+                        break;
+                    }
                 case "loadContacts":
                     {
                         user = users[users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend)];
@@ -292,14 +316,18 @@ namespace MyOwnChat
                         messEveryone.Priorety = "exit";
                         messEveryone.LoginReceive = "";
                         messEveryone.Answer = "";
-                        if (usersBase.Count == 0)
+
+                        foreach (var item in users)
                         {
-                            foreach (var item in users)
+                            foreach (var it in usersBase)
                             {
-                                usersBase.Add(item);
+                                if (item.Login == it.Login)
+                                    if (item.CountBadWord != it.CountBadWord)
+                                        it.CountBadWord = item.CountBadWord;
                             }
                         }
-                        //SaveListUser(usersBase);
+
+                        SaveUsers(usersBase);
                         SendToEveryone(user, messEveryone);
                         users.RemoveAt(users.FindIndex((x) => x.Login == ((DataMessage)data).Message.LoginSend));
                         break;
@@ -447,7 +475,7 @@ namespace MyOwnChat
                     Password = data.User.Password,
                     Tag = data.User.Tag,
                     CountBadWord = data.User.CountBadWord,
-                    Birthday = usersBase[usersBase.FindIndex((x) => x.Login == data.User.Login)].Birthday,
+                    Birthday = data.User.Birthday,
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint,
                     IPClient = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()
@@ -466,7 +494,7 @@ namespace MyOwnChat
                     Password = data.User.Password,
                     Tag = data.User.Tag,
                     CountBadWord = data.User.CountBadWord,
-                    Birthday = usersBase[usersBase.FindIndex((x) => x.Login == data.User.Login)].Birthday,
+                    Birthday = data.User.Birthday,
                     ClientTcp = socket,
                     EndPointClient = (IPEndPoint)socket.Client.LocalEndPoint,
                     IPClient = ((IPEndPoint)socket.Client.LocalEndPoint).Address.ToString()

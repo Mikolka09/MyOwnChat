@@ -146,7 +146,7 @@ namespace DataBaseProtocol
             {
                 Console.WriteLine(ex.Message);
             }
-            
+
         }
 
 
@@ -221,14 +221,16 @@ namespace DataBaseProtocol
             data.Messages = new List<Message>();
 
             var query = from M in dataBase.Messages
-                        join US in dataBase.Users on M.IdSend equals US.Id
-                        join UR in dataBase.Users on M.IdReceive equals UR.Id
+                        join US in dataBase.Users on M.IdSend equals US.Id into outer1
+                        join UR in dataBase.Users on M.IdReceive equals UR.Id into outer2
+                        from item1 in outer1.DefaultIfEmpty()
+                        from item2 in outer2.DefaultIfEmpty()
                         select new MixedMess
                         {
                             Text = M.Text,
                             Priorety = M.Priorety,
-                            LoginSend = US.Login,
-                            LoginReceive = UR.Login,
+                            LoginSend = item1.Login == null ? "0" : item1.Login,
+                            LoginReceive = item2 == null ? "0" : item2.Login,
                             Answer = M.Answer,
                             Moment = M.Moment.ToLongTimeString()
                         };

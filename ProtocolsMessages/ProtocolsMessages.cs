@@ -47,6 +47,12 @@ namespace ProtocolsMessages
     }
 
     [Serializable]
+    public class DataMessages : Data
+    {
+        public List<Message> ListM { get; set; }
+    }
+
+    [Serializable]
     public class DataFile : Data
     {
         public List<byte[]> FileByte { get; set; }

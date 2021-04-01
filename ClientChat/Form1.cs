@@ -43,6 +43,7 @@ namespace ClientChat
         private List<byte[]> contByte;
         private List<byte[]> listByte;
         public List<User> usersB;
+        public List<Message> listMess;
         public User client;
         public List<string> contCheck;
         public string nameGroup;
@@ -256,14 +257,25 @@ namespace ClientChat
                             listByte = new List<byte[]>();
                             usersB = new List<User>();
                             usersB = ReceiveUsers();
+                            listMess = new List<Message>();
+                            listMess = ReceiveMessages();
                             listViewContacts.Visible = false;
                             listViewClients.Visible = true;
+                            listViewStatistic.Visible = false;
+                            buttonCloseGroup.Visible = false;
+                            buttonGroupChat.Visible = false;
+                            buttonClearSt.Enabled = false;
+                            buttonBackChat.Enabled = false;
                             groupBox2.Text = "CONTACTS CLIENTS";
                         }
                         else
                         {
                             listViewContacts.Visible = true;
                             listViewClients.Visible = false;
+                            listViewStatistic.Visible = false;
+                            buttonBackChat.Visible= false;
+                            buttonClearSt.Visible = false;
+                            statisticToolStripMenuItem.Visible = false;
                             groupBox2.Text = "MY CONTACTS";
                         }
                         message = new Message();
@@ -311,6 +323,23 @@ namespace ClientChat
             Data data = Transfer.ReceiveTCP(socket);
             if (data is DataUsers)
                 return ((DataUsers)data).ListU;
+            else
+                return null;
+        }
+
+        public List<Message> ReceiveMessages()
+        {
+            Message mess = new Message();
+            mess.LoginSend = user.Login;
+            mess.LoginReceive = user.Login;
+            mess.Priorety = "statistic";
+            mess.Text = "";
+            mess.Moment = DateTime.Now.ToLongTimeString();
+            mess.Answer = "";
+            Transfer.SendTCP(socket, new DataMessage() { Message = mess });
+            Data data = Transfer.ReceiveTCP(socket);
+            if (data is DataMessages)
+                return ((DataMessages)data).ListM;
             else
                 return null;
         }
@@ -484,7 +513,7 @@ namespace ClientChat
         private void buttonLoadContacts_Click(object sender, EventArgs e)
         {
             if (user.Login == "Admin")
-            { 
+            {
                 AddToListViewClients();
             }
             else
@@ -846,6 +875,42 @@ namespace ClientChat
             }
         }
 
+        private void statisticToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ListViewItem it = listViewClients.SelectedItems[0];
+            string log = it.SubItems[0].Text;
+            listViewMessages.Visible = false;
+            buttonBackChat.Visible = true;
+            listViewStatistic.Visible = true;
+            label1.Text = $"STATISTIC MESSAGES LOGIN - {it.SubItems[0].Text}";
+            foreach (var item in listMess)
+            {
+                if (item.LoginSend == log)
+                {
+                    ListViewItem itt = new ListViewItem(item.LoginSend);
+                    itt.SubItems.Add(item.LoginReceive);
+                    itt.SubItems.Add(item.Text);
+                    itt.SubItems.Add(item.Moment);
+                    listViewStatistic.Items.Add(itt);
+                }
+                buttonClearSt.Enabled = true;
+                buttonBackChat.Enabled = true;
+            }
+            MessageBox.Show("Statistics ready", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void buttonClearSt_Click(object sender, EventArgs e)
+        {
+            listViewStatistic.Items.Clear();
+            buttonClearSt.Enabled = false;
+        }
+
+        private void buttonBackChat_Click(object sender, EventArgs e)
+        {
+            listViewMessages.Visible = true;
+            listViewStatistic.Visible = false;
+            buttonBackChat.Enabled = false;
+        }
     }
 
     class LoginComparer : IComparer<Contact>
